@@ -8,7 +8,7 @@
                 <b-form-input v-model="log_username" placeholder="Enter your username" pattern="(\w|\d){3,32}"></b-form-input>
             </b-form-group>
             <b-form-group label="Password:">
-                <b-form-input type="password" v-model="log_password" minlength="6"></b-form-input>
+                <b-form-input v-model="log_password" type="password" minlength="6"></b-form-input>
             </b-form-group>
             <b-button variant="primary" type="submit">Login</b-button>
         </b-form>
@@ -40,7 +40,7 @@ export default {
                 .then(res => {                    
                     if (res.data.status)
                     {
-                        
+                        this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
                     }
                     else
                     {

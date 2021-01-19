@@ -4,7 +4,7 @@
         <h2 class="text-center">Register</h2>
         <b-alert v-model="reg_showAlert" :variant="reg_alertType" dismissable>{{ reg_alert }}</b-alert>
         <b-form @submit="onSubmit">
-            <b-form-group label="Username:" description="Only letters, digits and underscore. Min 3 characters, max 32 characters">
+            <b-form-group label="Username:" description="Only letters, digits and underscore. Min 3 characters, max 32 characters.">
                 <b-form-input v-model="reg_username" placeholder="Enter your username" pattern="(\w|\d){3,32}"></b-form-input>
             </b-form-group>
             <b-form-group label="Password:">
@@ -42,6 +42,7 @@ export default {
                     if (res.data.status)
                     {
                         this.reg_alertType = "success";
+                        this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
                     }
                     else
                     {

@@ -10,5 +10,6 @@ module.exports = {
             cert: fs.readFileSync('/home/tom/ssl_keys/cert.pem'),
             ca: fs.readFileSync('/home/tom/ssl_keys/chain.pem'),
         }
-    }
+    },
+    outputDir: "/var/www/webchat/"
 };
