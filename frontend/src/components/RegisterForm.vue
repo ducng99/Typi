@@ -43,6 +43,7 @@ export default {
                     {
                         this.reg_alertType = "success";
                         this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
+                        this.$emit("loginCheck");
                     }
                     else
                     {

@@ -4,7 +4,9 @@ import express from "express"
 import cors from "cors"
 import fs from "fs"
 
-import {GenerateRandomString} from "./utilities.js"
+import SessionsHandler from "./sessions.js"
+import UsersHandler from "./users"
+import {CheckCredsValid} from "./utilities.js"
 
 var app = express();
 app.use(cors({origin: RegExp("ducng\.dev|\w*\.ducng\.dev")}));
@@ -23,6 +25,9 @@ var con = mysql.createPool({
 	password: mysql_creds.password,
 	database: "webchat"
 });
+
+SessionsHandler.con = con;
+UsersHandler.con = con;
 
 app.post("/register", function(req, res) {
     if (CheckCredsValid(req.body.username, req.body.password))
@@ -43,14 +48,14 @@ app.post("/register", function(req, res) {
             }
             else 
             {
-                CreateSession(req.body.username, (sessionID) => {
+                SessionsHandler.CreateSession(req.body.username, (sessionID) => {
                     if (sessionID == null)
                     {
                         res.send({status: false, msg: "Unable to generate session ID. Please contact administrator."});
                     }
                     else
                     {
-                        res.send({status: true, msg: "Sucessfully registered user " + req.body.username + "!", sessionID: sessionID});
+                        res.send({status: true, msg: "Successfully registered user " + req.body.username + "!", sessionID: sessionID});
                         console.log("User " + req.body.username + " created.");
                     }
                 });
@@ -77,14 +82,14 @@ app.post("/login", function(req, res) {
             {
                 if (result.length > 0)
                 {
-                    CreateSession(req.body.username, (sessionID) => {
+                    SessionsHandler.CreateSession(req.body.username, (sessionID) => {
                         if (sessionID == null)
                         {
                             res.send({status: false, msg: "Unable to generate session ID. Please contact administrator."});
                         }
                         else
                         {
-                            res.send({status: true, msg: "Logged in sucessfully!", sessionID: sessionID});
+                            res.send({status: true, msg: "Logged in successfully!", sessionID: sessionID});
                         }
                     });
                 }
@@ -102,63 +107,52 @@ app.post("/login", function(req, res) {
 });
 
 app.post("/verifySession", function(req, res) {
-    GetSession(req.body.sessionID, data => {
+    SessionsHandler.GetSession(req.body.sessionID, data => {
         res.send({status: data.status});
     });
 });
 
-app.post("/getUser", function(req, res) {
-    GetSession(req.body.sessionID, data => {
-        res.send({status: data.status, username: data.username});
+app.post("/users/get", function(req, res) {
+    SessionsHandler.GetSession(req.body.sessionID, data => {
+        res.send({status: data.status, username: data.user.Username});
     });
 });
 
-function CheckCredsValid(username, password)
-{
-    return (username && password && RegExp("(\\w|\\d){3,32}").test(username) && password.length >= 6);
-}
-
-function CreateSession(username, callback)
-{
-    let sql = "INSERT INTO Sessions (SessionID, Username, ExpireTime) VALUES (?, ?, ?);";
-    let sessionID = GenerateRandomString(64);
-    let expireTime = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
-    con.query(sql, [sessionID, username, expireTime], function (err, result) {
-        if (err)
-        {
-            console.error(err);
-            callback(null);
-        }
-        else
-        {
-            callback(sessionID);
-        }
-    });
-}
-
-function GetSession(sessionID, callback)
-{
-    if (sessionID)
-    {
-        let sql = "SELECT Username FROM Sessions WHERE SessionID = ?";
-        con.query(sql, [sessionID], function(err, result) {
-            if (err)
+app.post("/users/getFriends", function(req, res) {
+    SessionsHandler.GetSession(req.body.sessionID, data => {
+        UsersHandler.GetFriends(data.user.UserID, data2 => {
+            if (data2.status)
             {
-                console.error(err);
-                callback({status: false});
+                res.send({status: true, friends: data.friends});
             }
             else
             {
-                callback({status: true, username: result[0].Username});
+                res.send({status: false});
             }
         });
-    }
-    else
-    {
-        console.log("GetSession: Missing session ID");
-        callback({status: false});
-    }
-}
+    });
+});
+
+app.post("/users/addFriend", function(req, res) {
+    SessionsHandler.GetSession(req.body.sessionID, data => {
+        UsersHandler.AddFriend(data.user.UserID, req.body.targetUsername, data2 => {
+            res.send({status: data2.status, msg: data2.msg});
+        });
+    });
+});
+
+setInterval(function() {
+    con.query("DELETE FROM `Sessions` WHERE ExpireTime < ?", [Math.floor(Date.now() / 1000)], function(err) {
+        if (err)
+        {
+            console.error(err);
+        }
+        else
+        {
+            console.info("Cleared sessions.");
+        }
+    });
+}, 60000 * 10);
 
 // ERROR HANDLING - START
 //----------------------------------------------------------------------------------//

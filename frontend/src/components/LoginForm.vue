@@ -41,6 +41,7 @@ export default {
                     if (res.data.status)
                     {
                         this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
+                        this.$emit("loginCheck");
                     }
                     else
                     {
