@@ -5,8 +5,8 @@ class UsersHandler {
 
     GetFriends(userID, callback)
     {
-        let sql = "SELECT u.UserID, u.Username FROM Users u, Relationships r WHERE u.UserID = ? AND (u.UserID = r.User1 OR u.UserID = r.User2);";
-        this.con.query(sql, [userID], function(err, results) {
+        let sql = "SELECT u.Username, r.Status, r.TargetUser FROM Users u, Relationships r WHERE r.User1 = ? AND u.UserID = r.User2 UNION SELECT u.Username, r.Status, r.TargetUser FROM Users u, Relationships r WHERE r.User2 = ? AND u.UserID = r.User1 ORDER BY Username";
+        this.con.query(sql, [userID, userID], function(err, results) {
             if (err)
             {
                 console.error(err);
@@ -109,6 +109,51 @@ class UsersHandler {
             else
             {
                 callback({status: false, msg: "User does not exists!"});
+            }
+        });
+    }
+    
+    /**
+     * Get Messages from/to an user
+     * @param {Number} userID User ID of user
+     * @param {Function} callback Callback function to return results
+     */
+    GetMessages(userID, callback)
+    {
+        let sql = "SELECT * FROM Messages WHERE Sender = ? OR Receiver = ? ORDER BY SendTime DESC";
+        this.con.query(sql, [userID, userID], function(err, results) {
+            if (err)
+            {
+                console.error(err);
+                callback({status: false});
+            }
+            else
+            {
+                callback({status: true, messages: results});
+            }
+        });
+    }
+    
+    /**
+     * Send a message
+     * @param {Number} senderID User ID of sender
+     * @param {Number} receiverID User ID of receiver
+     * @param {String} content Message to be sent
+     * @param {Function} callback Callback function
+     */
+    SendMessage(senderID, receiverID, content, callback)
+    {
+        let sql = "INSERT INTO Messages (Sender, Receiver, Content, SendTime) VALUES (?, ?, ?, ?)";
+        let time = Math.floor(Date.now() / 1000);
+        this.con.query(sql, [senderID, receiverID, content, time], function(err) {
+            if (err)
+            {
+                console.error(err);
+                callback({status: false});
+            }
+            else
+            {
+                callback({status: true});
             }
         });
     }

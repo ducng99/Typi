@@ -2,7 +2,7 @@
 <div>
     <b-container class="rounded border p-3" id="loginFormContainer">
         <h2 class="text-center">Login</h2>
-        <b-alert v-model="log_showAlert" variant="danger" dismissable>{{ log_alert }}</b-alert>
+        <b-alert v-model="log_showAlert" variant="danger" dismissible fade>{{ log_alert }}</b-alert>
         <b-form @submit="onSubmit">
             <b-form-group label="Username:">
                 <b-form-input v-model="log_username" placeholder="Enter your username" pattern="(\w|\d){3,32}"></b-form-input>

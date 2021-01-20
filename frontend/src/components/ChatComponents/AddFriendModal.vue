@@ -3,7 +3,7 @@
         <b-form-group label="Their username:">
             <b-input v-model="addFriend_username" placeholder="username"></b-input>
         </b-form-group>
-        <b-alert v-model="showAlert" :variant="alertType" dismissable>{{ alertMsg }}</b-alert>
+        <b-alert v-model="showAlert" :variant="alertType" dismissible fade>{{ alertMsg }}</b-alert>
         <template #modal-footer>
             <b-button @click="onAddFriend" variant="primary">Add</b-button>
         </template>

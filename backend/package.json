@@ -1,12 +1,12 @@
 {
-  "name": "backend",
+  "name": "typi-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Typi app backend API server",
+  "private": false,
   "main": "index.js",
   "module": "main.js",
   "scripts": {
-    "start": "nodemon index.js",
-    "test": ""
+    "start": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",

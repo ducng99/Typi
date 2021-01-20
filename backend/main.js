@@ -123,7 +123,7 @@ app.post("/users/getFriends", function(req, res) {
         UsersHandler.GetFriends(data.user.UserID, data2 => {
             if (data2.status)
             {
-                res.send({status: true, friends: data.friends});
+                res.send({status: true, friends: data2.friends});
             }
             else
             {
@@ -137,6 +137,31 @@ app.post("/users/addFriend", function(req, res) {
     SessionsHandler.GetSession(req.body.sessionID, data => {
         UsersHandler.AddFriend(data.user.UserID, req.body.targetUsername, data2 => {
             res.send({status: data2.status, msg: data2.msg});
+        });
+    });
+});
+
+app.post("/users/getMessages", function(req, res) {
+    SessionsHandler.GetSession(req.body.sessionID, data => {
+        UsersHandler.GetMessages(data.user.UserID, data2 => {
+            if (data2.status)
+            {
+                res.send({status: true, messages: data2.messages});
+            }
+            else
+            {
+                res.send({status: false});
+            }
+        });
+    });
+});
+
+app.post("/users/sendMessage", function(req, res) {
+    SessionsHandler.GetSession(req.body.sessionID, data => {
+        UsersHandler.GetUserID(req.body.receiver, data2 => {
+            UsersHandler.SendMessage(data.user.UserID, data2.userID, req.body.message, data3 => {
+                res.send({status: data3.status});
+            });
         });
     });
 });

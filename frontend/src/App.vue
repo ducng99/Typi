@@ -3,7 +3,7 @@
         <div v-if="!loggedIn">
             <center>
                 <h1>E2EE Webchat</h1>
-                <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" class="mb-3">Login/Register</b-button>
+                <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" class="mb-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>
             <RegisterForm v-if="showRegisterOrLogin" @loginCheck="CheckSession"/>
             <LoginForm v-if="!showRegisterOrLogin" @loginCheck="CheckSession"/>

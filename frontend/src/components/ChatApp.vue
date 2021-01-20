@@ -13,18 +13,13 @@
         </b-row>
         <b-row class="flex-grow-1">
             <b-col cols="2" id="sidebar" class="p-3 border-right">
-                <div class="p-3" v-for="friend in listFriends" :key="friend.Username">{{friend.Username}}</div>
+                <div class="p-2 rounded chat-picker" v-for="friend in listFriends" :key="friend.Username" @click="receiver = friend.Username">
+                    <div class="d-inline-flex justify-content-center button-icon rounded-circle mr-3"><b-icon icon="person-fill" class="rounded-circle"></b-icon></div>
+                    <div class="d-inline-block">{{friend.Username}}</div>
+                </div>
             </b-col>
-            <b-col cols="10" id="main" class="d-flex flex-column p-0">
-                <div id="messagesContainer" class="flex-grow-1 p-3">
-                    c
-                </div>
-                <div id="chatbox" class="border-top p-2">
-                    <b-form inline @submit="onChat">
-                        <b-input v-model="message" class="flex-grow-1 rounded-pill mr-sm-3 mb-sm-0 mb-2" placeholder="Aa"></b-input>
-                        <b-button type="submit" variant="primary">Send</b-button>
-                    </b-form>
-                </div>
+            <b-col cols="10" id="main" class="p-0">
+                <Chatbox :receiver="receiver"/>
             </b-col>
         </b-row>
         
@@ -35,11 +30,12 @@
 <script>
 import axios from "axios"
 import AddFriendModal from "./ChatComponents/AddFriendModal.vue"
+import Chatbox from "./ChatComponents/Chatbox.vue"
 
 export default {
     name: 'ChatApp',
     components: {
-        AddFriendModal
+        AddFriendModal, Chatbox
     },
     props: {
         
@@ -48,15 +44,18 @@ export default {
         return {
             username: "",
             receiver: "who",
-            message: "",
             listFriends: []
         }
     },
     methods: {
-        onChat(event) {
-            event.preventDefault();
-            
-            this.message = "";
+        updateFriendsList() {
+            axios.post("https://chat-backend.ducng.dev/users/getFriends", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
+                .then(res => {
+                    if (res.data.status)
+                    {
+                        this.listFriends = res.data.friends;
+                    }
+                });
         }
     },
     created() {
@@ -72,13 +71,10 @@ export default {
                 }
             });
         
-        axios.post("https://chat-backend.ducng.dev/users/getFriends", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
-            .then(res => {
-                if (res.data.status)
-                {
-                    this.listFriends = res.data.friends;
-                }
-            });
+        this.updateFriendsList();
+        setInterval(() => {
+            this.updateFriendsList();
+        }, 60000);
     }
 }
 </script>
@@ -102,11 +98,16 @@ export default {
     transition: background-color 0.2s linear;
 }
 
-.button-icon:hover {
+.button-icon:hover, .chat-picker:hover {
     background-color: #ddd;
 }
 
-.button-icon:active {
+.button-icon:active, .chat-picker:active {
     background-color: #ccc;
+}
+
+.chat-picker {
+    cursor: pointer;
+    transition: background-color 0.1s linear;
 }
 </style>
