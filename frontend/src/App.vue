@@ -58,11 +58,11 @@ export default {
     font-family: Segoe UI Historic, Segoe UI, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    height: 100%;
+    height: 100vh;
 }
 
 html, body {
-    height: 100%;
+    height: 100vh;
 }
 
 body

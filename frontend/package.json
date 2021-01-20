@@ -39,6 +39,7 @@
     "rules": {
       "no-unused-vars": "off",
       "no-empty": "off",
+      "no-unused-labels": "off",
       "vue/no-unused-components": ["error", {
         "ignoreWhenBindingPresent": true
       }]

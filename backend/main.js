@@ -114,55 +114,95 @@ app.post("/verifySession", function(req, res) {
 
 app.post("/users/get", function(req, res) {
     SessionsHandler.GetSession(req.body.sessionID, data => {
-        res.send({status: data.status, username: data.user.Username});
+        res.send({status: data.status, user: data.user});
     });
 });
 
 app.post("/users/getFriends", function(req, res) {
     SessionsHandler.GetSession(req.body.sessionID, data => {
-        UsersHandler.GetFriends(data.user.UserID, data2 => {
-            if (data2.status)
-            {
-                res.send({status: true, friends: data2.friends});
-            }
-            else
-            {
-                res.send({status: false});
-            }
-        });
+        if (data.status)
+        {
+            UsersHandler.GetFriends(data.user.UserID, data2 => {
+                if (data2.status)
+                {
+                    res.send({status: true, friends: data2.friends});
+                }
+                else
+                {
+                    res.send({status: false});
+                }
+            });
+        }
+        else
+        {
+            res.send({status: false});
+        }
     });
 });
 
 app.post("/users/addFriend", function(req, res) {
     SessionsHandler.GetSession(req.body.sessionID, data => {
-        UsersHandler.AddFriend(data.user.UserID, req.body.targetUsername, data2 => {
-            res.send({status: data2.status, msg: data2.msg});
-        });
+        if (data.status)
+        {
+            UsersHandler.AddFriend(data.user.UserID, req.body.targetUsername, data2 => {
+                res.send({status: data2.status, msg: data2.msg});
+            });
+        }
+        else
+        {
+            res.send({status: false, msg: "Unable to verify your session."});
+        }
     });
 });
 
 app.post("/users/getMessages", function(req, res) {
     SessionsHandler.GetSession(req.body.sessionID, data => {
-        UsersHandler.GetMessages(data.user.UserID, data2 => {
-            if (data2.status)
-            {
-                res.send({status: true, messages: data2.messages});
-            }
-            else
-            {
-                res.send({status: false});
-            }
-        });
+        if (data.status) {
+            UsersHandler.GetUserID(req.body.receiver, data2 => {
+                if (data2.status) {
+                    UsersHandler.GetMessages(data.user.UserID, data2.userID, data3 => {
+                        if (data3.status)
+                        {
+                            res.send({status: true, messages: data3.messages});
+                        }
+                        else
+                        {
+                            res.send({status: false});
+                        }
+                    });
+                }
+                else
+                {
+                    res.send({status: false});
+                }
+            });
+        }
+        else
+        {
+            res.send({status: false});
+        }
     });
 });
 
 app.post("/users/sendMessage", function(req, res) {
     SessionsHandler.GetSession(req.body.sessionID, data => {
-        UsersHandler.GetUserID(req.body.receiver, data2 => {
-            UsersHandler.SendMessage(data.user.UserID, data2.userID, req.body.message, data3 => {
-                res.send({status: data3.status});
+        if (data.status) {
+            UsersHandler.GetUserID(req.body.receiver, data2 => {
+                if (data2.status) {
+                    UsersHandler.SendMessage(data.user.UserID, data2.userID, req.body.message, data3 => {
+                        res.send({status: data3.status});
+                    });
+                }
+                else
+                {
+                    res.send({status: false});
+                }
             });
-        });
+        }
+        else
+        {
+            res.send({status: false});
+        }
     });
 });
 

@@ -4,8 +4,13 @@
         <div v-if="listMessages.length === 0" class="text-center">
             <small><i>Start sending text messages to {{ receiver }}!</i></small>
         </div>
-        <div class="w-100" v-for="message in listMessages" :key="message.MessageID">
-            {{message.Content}}
+        <div class="w-100" v-for="message in listMessages.slice().reverse()" :key="message.MessageID">
+            <div v-if="message.Sender === myUserID" class="d-flex w-100 mb-1 justify-content-end">
+                <div class="outgoing_msg">{{ message.Content }}</div>
+            </div>
+            <div v-if="message.Receiver === myUserID" class="d-flex w-100 mb-1 justify-content-start">
+                <div class="incoming_msg">{{ message.Content }}</div>
+            </div>
         </div>
     </div>
     <div id="chatbox" class="border-top p-2">
@@ -19,16 +24,35 @@
 
 <script>
 import axios from "axios"
+var interval_refreshMsgs;
+var msgContainerScrolled = false;
+var msgContainer;
+
+function updateMessagesScroll() {
+    if (msgContainer.scrollHeight - msgContainer.clientHeight != 0)
+    {    
+        if (msgContainer.scrollTop == msgContainer.scrollHeight - msgContainer.clientHeight && msgContainerScrolled)
+        {
+            msgContainerScrolled = false;
+        }
+        
+        if (!msgContainerScrolled)
+        {
+            msgContainer.scrollTop = msgContainer.scrollHeight - msgContainer.clientHeight;
+        }
+    }
+}
 
 export default {
     name: 'Chatbox',
     props: {
-        receiver: String
+        myUserID: Number
     },
     data() {
         return {
             listMessages: [],
-            messageToSend: ""
+            messageToSend: "",
+            receiver: ""
         }
     },
     methods: {
@@ -47,41 +71,78 @@ export default {
                 }
                 else
                 {
+                    this.$bvToast.hide();
                     this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
                         title: "Oops!",
                         toaster: "b-toaster-top-center",
                         solid: true,
-                        autoHideDelay: 5000
+                        autoHideDelay: 5000,
+                        variant: "danger"
                     });
                 }
             });
         },
         getMessages() {
-            axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
-            .then(res => {
-                if (res.data.status)
-                {
-                    this.listMessages = res.data.messages;
-                }
-                else
-                {
-                    this.$bvToast.toast("Unable to get messages. Please contact admin if this occurs again.", {
-                        title: "Oops!",
-                        toaster: "b-toaster-top-center",
-                        solid: true,
-                        autoHideDelay: 5000
-                    });
-                }
-            });
+            if (this.receiver)
+            {
+                axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiver: this.receiver})
+                .then(res => {
+                    if (res.data.status)
+                    {
+                        let tmp = new Set();
+                        
+                        this.listMessages = [...res.data.messages, ...this.listMessages].filter(entry => {
+                            if (tmp.has(entry.MessageID)) {
+                                return false;
+                            }
+                            tmp.add(entry.MessageID);
+                            return true;
+                        });
+                    }
+                    else
+                    {
+                        this.$bvToast.hide();
+                        this.$bvToast.toast("Unable to get messages. Please contact admin if this occurs again.", {
+                            title: "Oops!",
+                            toaster: "b-toaster-top-center",
+                            solid: true,
+                            autoHideDelay: 5000,
+                            variant: "danger"
+                        });
+                    }
+                });
+            }
+        },
+        updateReceiver(newReceiver) {
+            if (newReceiver !== this.receiver) {
+                this.receiver = newReceiver;
+                msgContainerScrolled = false;
+                this.listMessages = [];
+                this.getMessages();
+            }
         }
+    },
+    updated() {
+        msgContainer = document.getElementById("messagesContainer");
+        msgContainer.onscroll = (event) => { msgContainerScrolled = true };
+        updateMessagesScroll();
     },
     created() {
         this.getMessages();
+        
+        interval_refreshMsgs = setInterval(this.getMessages, 1000);
+    },
+    destroyed() {
+        clearInterval(interval_refreshMsgs);
     }
 }
 </script>
 
 <style>
+#messagesContainer {
+    height: 75vh;
+}
+
 #chatbox input {
     box-shadow: none;
 }
@@ -106,5 +167,19 @@ export default {
 #sendButton svg {
     width: 26px;
     height: 26px;
+}
+
+.outgoing_msg {
+    background-color: #007bff;
+    color: white;
+}
+
+.incoming_msg {
+    background-color: #eee;
+}
+
+.outgoing_msg, .incoming_msg {
+    border-radius: 18px;
+    padding: 7px 12px 8px 12px;
 }
 </style>

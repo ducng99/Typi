@@ -116,12 +116,13 @@ class UsersHandler {
     /**
      * Get Messages from/to an user
      * @param {Number} userID User ID of user
+     * @param {Number} targetID User ID of receiver
      * @param {Function} callback Callback function to return results
      */
-    GetMessages(userID, callback)
+    GetMessages(userID, targetID, callback)
     {
-        let sql = "SELECT * FROM Messages WHERE Sender = ? OR Receiver = ? ORDER BY SendTime DESC";
-        this.con.query(sql, [userID, userID], function(err, results) {
+        let sql = "SELECT * FROM Messages WHERE (Sender = ? AND Receiver = ?) OR (Receiver = ? AND Sender = ?) ORDER BY MessageID DESC LIMIT 20";
+        this.con.query(sql, [userID, targetID, userID, targetID], function(err, results) {
             if (err)
             {
                 console.error(err);

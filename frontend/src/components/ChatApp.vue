@@ -2,6 +2,7 @@
     <b-container fluid id="chatAppContainer" class="d-flex h-100 flex-column">
         <b-row>
             <b-col cols="2" id="sidebar_Top" class="p-3 border-right">
+                <h2>Typi</h2>
                 <div class="d-inline-block">
                     Hi <b>{{username}}</b>.
                 </div>
@@ -13,13 +14,13 @@
         </b-row>
         <b-row class="flex-grow-1">
             <b-col cols="2" id="sidebar" class="p-3 border-right">
-                <div class="p-2 rounded chat-picker" v-for="friend in listFriends" :key="friend.Username" @click="receiver = friend.Username">
+                <div class="p-2 rounded chat-picker" v-for="friend in listFriends" :key="friend.Username" @click="onChatPick(friend.Username)">
                     <div class="d-inline-flex justify-content-center button-icon rounded-circle mr-3"><b-icon icon="person-fill" class="rounded-circle"></b-icon></div>
                     <div class="d-inline-block">{{friend.Username}}</div>
                 </div>
             </b-col>
             <b-col cols="10" id="main" class="p-0">
-                <Chatbox :receiver="receiver"/>
+                <Chatbox ref="chatbox" :myUserID="userID"/>
             </b-col>
         </b-row>
         
@@ -43,7 +44,8 @@ export default {
     data() {
         return {
             username: "",
-            receiver: "who",
+            userID: 0,
+            receiver: "",
             listFriends: []
         }
     },
@@ -56,6 +58,10 @@ export default {
                         this.listFriends = res.data.friends;
                     }
                 });
+        },
+        onChatPick(pReceiver) {
+            this.receiver = pReceiver;
+            this.$refs.chatbox.updateReceiver(this.receiver);
         }
     },
     created() {
@@ -63,7 +69,8 @@ export default {
             .then(res => {
                 if (res.data.status)
                 {
-                    this.username = res.data.username;
+                    this.username = res.data.user.Username;
+                    this.userID = res.data.user.UserID;
                 }
                 else
                 {
