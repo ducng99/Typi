@@ -8,7 +8,7 @@
             Chat with <b>{{receiver}}</b>
         </div>
         <div class="flex-grow-1" style="height: 75vh">
-            <div v-if="loadingMessages" class="h-100 w-100 d-flex align-items-center justify-content-center">
+            <div v-if="loadingMessages" class="h-100 d-flex align-items-center justify-content-center">
                 <b-spinner variant="primary" label="Loading..."></b-spinner>
             </div>
             <div v-else class="w-100 h-100 d-flex flex-column-reverse p-3 overflow-auto" id="messagesContainer">
@@ -27,8 +27,8 @@
         </div>
         <div id="chatbox" class="border-top p-2">
             <b-form inline @submit="sendMessage">
-                <b-input id="messageToSend" class="flex-grow-1 rounded-pill mr-sm-1 mb-sm-0 mb-2" placeholder="Type..."/>
-                <div class="d-flex rounded-circle justify-content-center" id="sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
+                <b-input id="messageInput" class="flex-grow-1 rounded-pill mr-1" placeholder="Type..."/>
+                <div class="d-inline-flex rounded-circle justify-content-center" id="sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
             </b-form>
         </div>
     </div>
@@ -40,6 +40,7 @@ import axios from "axios"
 
 var interval_refreshMsgs;
 var getMessagesQueue = 0;
+var updatedReceiver = false;
 
 export default {
     name: 'Chatbox',
@@ -56,7 +57,7 @@ export default {
     methods: {
         sendMessage(event) {
             event.preventDefault();
-            let msgBox = document.getElementById("messageToSend");
+            let msgBox = document.getElementById("messageInput");
             let msgContent = msgBox.value;
             msgBox.value = "";
             
@@ -136,11 +137,15 @@ export default {
                 interval_refreshMsgs = setInterval(this.getMessages, 1000);
             }
             
-            document.querySelector("#chatbox input")?.focus();
+            updatedReceiver = true;
         }
     },
     updated() {
-        
+        if (updatedReceiver)
+        {
+            document.getElementById("messageInput")?.focus();
+            updatedReceiver = false;
+        }
     },
     created() {
         this.getMessages();
@@ -154,10 +159,12 @@ export default {
 </script>
 
 <style>
-#chatbox input {
+#messageInput {
     box-shadow: none;
     background-color: #f3f3f3;
     border: none;
+    display: inline-block;
+    width: 100px;
 }
 
 #sendButton {
