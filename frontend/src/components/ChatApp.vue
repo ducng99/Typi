@@ -53,7 +53,6 @@ export default {
     data() {
         return {
             currentUser: {},
-            receiver: "",
             acceptedFriends: [],
             blockedFriends: [],
             pendingFriends: [],
@@ -80,9 +79,8 @@ export default {
                     }
                 });
         },
-        onChatPick(pReceiver) {
-            this.receiver = pReceiver;
-            this.$refs.chatbox.updateReceiver(this.receiver);
+        onChatPick(receiver) {
+            this.$refs.chatbox.updateReceiver(receiver);
         },
         showListFriendsModal(type) {
             switch (type) {

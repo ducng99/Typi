@@ -40,6 +40,7 @@ import axios from "axios"
 var interval_refreshMsgs;
 var msgContainerScrolled = false;
 var msgContainer;
+var getMessagesQueue = 0;
 
 function updateMessagesScroll() {
     if (msgContainer.scrollHeight - msgContainer.clientHeight != 0)
@@ -96,11 +97,16 @@ export default {
                 }
             });
         },
-        getMessages() {
-            if (this.receiver)
+        getMessages(pReceiver = this.receiver) {
+            let queue = ++getMessagesQueue;
+            
+            if (pReceiver)
             {
-                axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiver: this.receiver})
+                axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiver: pReceiver})
                 .then(res => {
+                    if (queue < getMessagesQueue)
+                        return;
+                    
                     if (res.data.status)
                     {
                         let tmp = new Set();
@@ -126,6 +132,8 @@ export default {
                             variant: "danger"
                         });
                     }
+                    
+                    this.receiver = pReceiver;
                 });
             }
         },
@@ -133,10 +141,9 @@ export default {
             if (newReceiver !== this.receiver) {
                 clearInterval(interval_refreshMsgs);
                 this.loadingMessages = true;
-                this.receiver = newReceiver;
                 msgContainerScrolled = false;
                 this.listMessages = [];
-                this.getMessages();
+                this.getMessages(newReceiver);
                 interval_refreshMsgs = setInterval(this.getMessages, 1000);
             }
             
