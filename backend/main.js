@@ -252,30 +252,33 @@ app.post("/users/getMessages", function (req, res)
 
 app.post("/users/sendMessage", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    if (req.body.message)
     {
-        if (data.status)
+        SessionsHandler.GetSession(req.body.sessionID, data =>
         {
-            UsersHandler.GetUserID(req.body.receiver, data2 =>
+            if (data.status)
             {
-                if (data2.status)
+                UsersHandler.GetUserID(req.body.receiver, data2 =>
                 {
-                    UsersHandler.SendMessage(data.user.UserID, data2.userID, req.body.message, data3 =>
+                    if (data2.status)
                     {
-                        res.send({ status: data3.status });
-                    });
-                }
-                else
-                {
-                    res.send({ status: false });
-                }
-            });
-        }
-        else
-        {
-            res.send({ status: false });
-        }
-    });
+                        UsersHandler.SendMessage(data.user.UserID, data2.userID, req.body.message, data3 =>
+                        {
+                            res.send({ status: data3.status });
+                        });
+                    }
+                    else
+                    {
+                        res.send({ status: false });
+                    }
+                });
+            }
+            else
+            {
+                res.send({ status: false });
+            }
+        });
+    }
 });
 
 setInterval(function ()

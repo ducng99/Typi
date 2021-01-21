@@ -7,27 +7,27 @@
         <div class="p-3 border-bottom position-relative shadow-sm">
             Chat with <b>{{receiver}}</b>
         </div>
-        <div class="flex-grow-1 d-flex align-items-end" style="height: 75vh">
+        <div class="flex-grow-1" style="height: 75vh">
             <div v-if="loadingMessages" class="h-100 w-100 d-flex align-items-center justify-content-center">
                 <b-spinner variant="primary" label="Loading..."></b-spinner>
             </div>
-            <div v-else class="w-100 h-100 p-3 overflow-auto" id="messagesContainer">
+            <div v-else class="w-100 h-100 d-flex flex-column-reverse p-3 overflow-auto" id="messagesContainer">
                 <div v-if="listMessages.length === 0" class="text-center">
                     <small><i>Start sending text messages to {{ receiver }}!</i></small>
                 </div>
-                <div class="w-100" v-for="message in listMessages.slice().reverse()" :key="message.MessageID">
+                <div class="w-100" v-for="message in listMessages" :key="message.MessageID">
                     <div v-if="message.Sender === myUserID" class="d-flex w-100 mb-1 justify-content-end">
-                        <div class="outgoing_msg" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                        <div class="outgoing_msg text-break" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                     </div>
                     <div v-if="message.Receiver === myUserID" class="d-flex w-100 mb-1 justify-content-start">
-                        <div class="incoming_msg" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                        <div class="incoming_msg text-break" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                     </div>
                 </div>
             </div>
         </div>
         <div id="chatbox" class="border-top p-2">
             <b-form inline @submit="sendMessage">
-                <b-input v-model="messageToSend" class="flex-grow-1 rounded-pill mr-sm-1 mb-sm-0 mb-2" placeholder="Type..."></b-input>
+                <b-input id="messageToSend" class="flex-grow-1 rounded-pill mr-sm-1 mb-sm-0 mb-2" placeholder="Type..."/>
                 <div class="d-flex rounded-circle justify-content-center" id="sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
             </b-form>
         </div>
@@ -39,24 +39,7 @@
 import axios from "axios"
 
 var interval_refreshMsgs;
-var msgContainerScrolled = false;
-var msgContainer;
 var getMessagesQueue = 0;
-
-function updateMessagesScroll() {
-    if (msgContainer.scrollHeight - msgContainer.clientHeight != 0)
-    {    
-        if (msgContainer.scrollTop == msgContainer.scrollHeight - msgContainer.clientHeight && msgContainerScrolled)
-        {
-            msgContainerScrolled = false;
-        }
-        
-        if (!msgContainerScrolled)
-        {
-            msgContainer.scrollTop = msgContainer.scrollHeight - msgContainer.clientHeight;
-        }
-    }
-}
 
 export default {
     name: 'Chatbox',
@@ -66,7 +49,6 @@ export default {
     data() {
         return {
             listMessages: [],
-            messageToSend: "",
             receiver: "",
             loadingMessages: false
         }
@@ -74,29 +56,36 @@ export default {
     methods: {
         sendMessage(event) {
             event.preventDefault();
+            let msgBox = document.getElementById("messageToSend");
+            let msgContent = msgBox.value;
+            msgBox.value = "";
             
-            axios.post("https://chat-backend.ducng.dev/users/sendMessage", {
-                sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID),
-                receiver: this.receiver,
-                message: this.messageToSend
-            }).then(res => {
-                if (res.data.status)
-                {
-                    this.getMessages();
-                    this.messageToSend = "";
-                }
-                else
-                {
-                    this.$bvToast.hide();
-                    this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
-                        title: "Oops!",
-                        toaster: "b-toaster-top-center",
-                        solid: true,
-                        autoHideDelay: 5000,
-                        variant: "danger"
-                    });
-                }
-            });
+            if (msgContent)
+            {
+                axios.post("https://chat-backend.ducng.dev/users/sendMessage", {
+                    sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID),
+                    receiver: this.receiver,
+                    message: msgContent
+                }).then(res => {
+                    if (res.data.status)
+                    {
+                        this.getMessages();
+                    }
+                    else
+                    {
+                        this.$bvToast.hide();
+                        this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
+                            title: "Oops!",
+                            toaster: "b-toaster-top-center",
+                            solid: true,
+                            autoHideDelay: 5000,
+                            variant: "danger"
+                        });
+                        
+                        msgBox.value = msgContent;
+                    }
+                });
+            }
         },
         getMessages(pReceiver = this.receiver) {
             let queue = ++getMessagesQueue;
@@ -105,36 +94,36 @@ export default {
             {
                 axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiver: pReceiver})
                 .then(res => {
-                    if (queue < getMessagesQueue)
-                        return;
-                    
-                    if (res.data.status)
+                    if (queue == getMessagesQueue)
                     {
-                        let tmp = new Set();
-                        
-                        this.listMessages = [...res.data.messages, ...this.listMessages].filter(entry => {
-                            if (tmp.has(entry.MessageID)) {
-                                return false;
-                            }
-                            tmp.add(entry.MessageID);
-                            return true;
-                        });
-                        
-                        this.loadingMessages = false;
-                    }
-                    else
-                    {
-                        this.$bvToast.hide();
-                        this.$bvToast.toast("Unable to get messages. Please contact admin if this occurs again.", {
-                            title: "Oops!",
-                            toaster: "b-toaster-top-center",
-                            solid: true,
-                            autoHideDelay: 5000,
-                            variant: "danger"
-                        });
-                    }
+                        if (res.data.status)
+                        {
+                            let tmp = new Set();
+                            
+                            this.listMessages = [...res.data.messages, ...this.listMessages].filter(entry => {
+                                if (tmp.has(entry.MessageID)) {
+                                    return false;
+                                }
+                                tmp.add(entry.MessageID);
+                                return true;
+                            });
+                            
+                            this.loadingMessages = false;
+                        }
+                        else
+                        {
+                            this.$bvToast.hide();
+                            this.$bvToast.toast("Unable to get messages. Please contact admin if this occurs again.", {
+                                title: "Oops!",
+                                toaster: "b-toaster-top-center",
+                                solid: true,
+                                autoHideDelay: 5000,
+                                variant: "danger"
+                            });
+                        }
                     
-                    this.receiver = pReceiver;
+                        this.receiver = pReceiver;
+                    }
                 });
             }
         },
@@ -142,7 +131,6 @@ export default {
             if (newReceiver !== this.receiver) {
                 clearInterval(interval_refreshMsgs);
                 this.loadingMessages = true;
-                msgContainerScrolled = false;
                 this.listMessages = [];
                 this.getMessages(newReceiver);
                 interval_refreshMsgs = setInterval(this.getMessages, 1000);
@@ -152,9 +140,7 @@ export default {
         }
     },
     updated() {
-        msgContainer = document.getElementById("messagesContainer");
-        msgContainer.onscroll = (event) => { msgContainerScrolled = true };
-        updateMessagesScroll();
+        
     },
     created() {
         this.getMessages();
