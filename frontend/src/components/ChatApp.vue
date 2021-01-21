@@ -7,23 +7,23 @@
                     <div class="mr-auto">
                         Hi <b>{{currentUser.Username}}</b>.
                     </div>
-                    <div @click="$bvModal.show('addFriendModal')" class="d-flex button-icon rounded-circle justify-content-center align-items-center">
+                    <div @click="$bvModal.show('addFriendModal')" class="button-icon">
                         <b-icon icon="person-plus-fill"></b-icon>
                     </div>
                     <div class="ml-1">
-                        <div @click="showMenu = !showMenu" class="d-flex button-icon rounded-circle justify-content-center align-items-center">
+                        <div @click="showMenu = !showMenu" class="button-icon">
                             <b-icon icon="three-dots"></b-icon>
                         </div>
                         <OptionsMenu v-model="showMenu"/>
                     </div>
                 </div>
                 <div class="mt-3" id="listFriends">
-                    <div class="d-flex p-2 rounded menu-entry align-items-center" v-if="pendingFriends.length > 0">
-                        <b-badge class="mr-2" variant="info">{{ pendingFriends.length }}</b-badge>
+                    <div class="d-flex p-2 rounded menu-entry align-items-center" v-if="pendingFriends.length > 0" @click="showListFriendsModal('Pending')">
                         <b>Pending requests</b>
+                        <b-badge class="ml-auto" variant="info">{{ pendingFriends.length }}</b-badge>
                     </div>
                     <div class="d-flex p-2 rounded menu-entry align-items-center" v-for="friend in acceptedFriends" :key="friend.Username" @click="onChatPick(friend.Username)">
-                        <div class="d-inline-flex justify-content-center mr-3"><b-avatar icon="person-fill"></b-avatar></div>
+                        <div class="d-inline-flex justify-content-center mr-3"><b-avatar :text="friend.Username.charAt(0)"></b-avatar></div>
                         <div class="d-inline-block">{{friend.Username}}</div>
                     </div>
                 </div>
@@ -67,24 +67,15 @@ export default {
                     if (res.data.status)
                     {
                         this.acceptedFriends = res.data.friends.filter(entry => {
-                            if (entry.Status === "Friends")
-                                return true;
-                            
-                            return false;
+                            return entry.Status === "Friends";
                         });
                         
                         this.blockedFriends = res.data.friends.filter(entry => {
-                            if (entry.Status === "Blocked" && entry.TargetUser !== this.currentUser.UserID)
-                                return true;
-                            
-                            return false;
+                            return (entry.Status === "Blocked" && entry.TargetUser !== this.currentUser.UserID);
                         });
                         
                         this.pendingFriends = res.data.friends.filter(entry => {
-                            if (entry.Status === "Pending" && entry.TargetUser !== this.currentUser.UserID)
-                                return true;
-                            
-                            return false;
+                            return (entry.Status === "Pending" && entry.TargetUser === this.currentUser.UserID);
                         });
                     }
                 });
@@ -92,6 +83,18 @@ export default {
         onChatPick(pReceiver) {
             this.receiver = pReceiver;
             this.$refs.chatbox.updateReceiver(this.receiver);
+        },
+        showListFriendsModal(type) {
+            switch (type) {
+                case "Blocked":
+                    this.$refs.listFriendsModal.create("Blocked list", this.blockedFriends, type);
+                    break;
+                case "Pending":
+                    this.$refs.listFriendsModal.create("Pending requests", this.pendingFriends, type);
+                    break;
+                default:
+                    break;
+            }
         }
     },
     created() {
@@ -124,16 +127,29 @@ export default {
     cursor: pointer;
     height: 38px;
     width: 38px;
-    background-color: #eee;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
     transition: background-color 0.2s linear;
 }
 
 .button-icon:hover {
-    background-color: #ddd;
+    background-color: #e9e9e9;
 }
 
 .button-icon:active {
-    background-color: #ccc;
+    background-color: #dbdcdd;
+}
+
+.disabled .button-icon, .button-icon.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.disabled .button-icon:hover, .button-icon.disabled:hover {
+    background-color: #e9e9e9;
 }
 
 .menu-entry {
@@ -147,10 +163,10 @@ export default {
 }
 
 .menu-entry:hover {
-    background-color: #eee;
+    background-color: #f3f3f3;
 }
 
 .menu-entry:active {
-    background-color: #ddd;
+    background-color: #e5e5e5;
 }
 </style>

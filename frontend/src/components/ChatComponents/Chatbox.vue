@@ -166,7 +166,7 @@ export default {
 
 #chatbox input {
     box-shadow: none;
-    background-color: #f5f5f8;
+    background-color: #f3f3f3;
     border: none;
 }
 
@@ -180,11 +180,11 @@ export default {
 }
 
 #sendButton:hover {
-    background-color: #eee;
+    background-color: #f3f3f3;
 }
 
 #sendButton:active {
-    background-color: #ddd;
+    background-color: #e5e5e5;
 }
 
 #sendButton svg {
