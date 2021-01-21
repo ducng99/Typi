@@ -12,7 +12,9 @@
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.5",
+    "node-rsa": "^1.1.1",
     "vue": "^2.6.11",
+    "vue-clickaway": "^2.2.2",
     "vue-cookies": "^1.7.4"
   },
   "devDependencies": {
@@ -40,9 +42,12 @@
       "no-unused-vars": "off",
       "no-empty": "off",
       "no-unused-labels": "off",
-      "vue/no-unused-components": ["error", {
-        "ignoreWhenBindingPresent": true
-      }]
+      "vue/no-unused-components": [
+        "error",
+        {
+          "ignoreWhenBindingPresent": true
+        }
+      ]
     }
   },
   "browserslist": [

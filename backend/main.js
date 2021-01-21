@@ -1,5 +1,4 @@
 import mysql from "mysql"
-import rsa from "node-rsa"
 import express from "express"
 import cors from "cors"
 import fs from "fs"
@@ -105,6 +104,20 @@ app.post("/login", function(req, res) {
         res.send({status: false, msg: "Username or password not valid!"});
     }
 });
+
+app.post("/logout", function (req, res) {
+    con.query("DELETE FROM `Sessions` WHERE SessionID = ?", [req.body.sessionID], (err) => {
+        if (err)
+        {
+            console.error(err);
+            res.send({status: false});
+        }
+        else
+        {
+            res.send({status: true});
+        }
+    })
+})
 
 app.post("/verifySession", function(req, res) {
     SessionsHandler.GetSession(req.body.sessionID, data => {

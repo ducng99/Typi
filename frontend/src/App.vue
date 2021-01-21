@@ -2,8 +2,8 @@
     <div id="app">
         <div v-if="!loggedIn">
             <center>
-                <h1>E2EE Webchat</h1>
-                <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" class="mb-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
+                <h1>Typi</h1>
+                <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>
             <RegisterForm v-if="showRegisterOrLogin" @loginCheck="CheckSession"/>
             <LoginForm v-if="!showRegisterOrLogin" @loginCheck="CheckSession"/>
@@ -58,7 +58,7 @@ export default {
     font-family: Segoe UI Historic, Segoe UI, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    height: 100vh;
+    height: 100%;
 }
 
 html, body {

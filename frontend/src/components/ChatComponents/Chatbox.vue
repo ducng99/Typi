@@ -1,23 +1,36 @@
 <template>
-<div class="d-flex flex-column h-100">
-    <div id="messagesContainer" class="flex-grow-1 p-3 overflow-auto">
-        <div v-if="listMessages.length === 0" class="text-center">
-            <small><i>Start sending text messages to {{ receiver }}!</i></small>
-        </div>
-        <div class="w-100" v-for="message in listMessages.slice().reverse()" :key="message.MessageID">
-            <div v-if="message.Sender === myUserID" class="d-flex w-100 mb-1 justify-content-end">
-                <div class="outgoing_msg">{{ message.Content }}</div>
-            </div>
-            <div v-if="message.Receiver === myUserID" class="d-flex w-100 mb-1 justify-content-start">
-                <div class="incoming_msg">{{ message.Content }}</div>
-            </div>
-        </div>
+<div class="h-100">
+    <div class="h-100 d-flex align-items-center justify-content-center" v-if="!receiver">
+        Choose a friend to start talking to!
     </div>
-    <div id="chatbox" class="border-top p-2">
-        <b-form inline @submit="sendMessage">
-            <b-input v-model="messageToSend" class="flex-grow-1 rounded-pill mr-sm-1 mb-sm-0 mb-2" placeholder="Aa"></b-input>
-            <div class="d-flex rounded-circle justify-content-center" id="sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
-        </b-form>
+    <div class="d-flex flex-column h-100" v-if="receiver">
+        <div class="p-3 border-bottom position-relative shadow-sm">
+            Chat with <b>{{receiver}}</b>
+        </div>
+        <div id="messagesContainer" class="flex-grow-1 p-3 overflow-auto">
+            <div v-if="loadingMessages" class="h-100 d-flex align-items-center justify-content-center">
+                <b-spinner variant="primary" label="Loading..."></b-spinner>
+            </div>
+            <div v-else>
+                <div v-if="listMessages.length === 0" class="text-center">
+                    <small><i>Start sending text messages to {{ receiver }}!</i></small>
+                </div>
+                <div class="w-100" v-for="message in listMessages.slice().reverse()" :key="message.MessageID">
+                    <div v-if="message.Sender === myUserID" class="d-flex w-100 mb-1 justify-content-end">
+                        <div class="outgoing_msg" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                    </div>
+                    <div v-if="message.Receiver === myUserID" class="d-flex w-100 mb-1 justify-content-start">
+                        <div class="incoming_msg" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="chatbox" class="border-top p-2">
+            <b-form inline @submit="sendMessage">
+                <b-input v-model="messageToSend" class="flex-grow-1 rounded-pill mr-sm-1 mb-sm-0 mb-2" placeholder="Type..."></b-input>
+                <div class="d-flex rounded-circle justify-content-center" id="sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
+            </b-form>
+        </div>
     </div>
 </div>
 </template>
@@ -52,7 +65,8 @@ export default {
         return {
             listMessages: [],
             messageToSend: "",
-            receiver: ""
+            receiver: "",
+            loadingMessages: false
         }
     },
     methods: {
@@ -98,6 +112,8 @@ export default {
                             tmp.add(entry.MessageID);
                             return true;
                         });
+                        
+                        this.loadingMessages = false;
                     }
                     else
                     {
@@ -115,11 +131,16 @@ export default {
         },
         updateReceiver(newReceiver) {
             if (newReceiver !== this.receiver) {
+                clearInterval(interval_refreshMsgs);
+                this.loadingMessages = true;
                 this.receiver = newReceiver;
                 msgContainerScrolled = false;
                 this.listMessages = [];
                 this.getMessages();
+                interval_refreshMsgs = setInterval(this.getMessages, 1000);
             }
+            
+            document.querySelector("#chatbox input")?.focus();
         }
     },
     updated() {
@@ -145,6 +166,8 @@ export default {
 
 #chatbox input {
     box-shadow: none;
+    background-color: #f5f5f8;
+    border: none;
 }
 
 #sendButton {
