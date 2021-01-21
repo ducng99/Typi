@@ -7,11 +7,11 @@
         <div class="p-3 border-bottom position-relative shadow-sm">
             Chat with <b>{{receiver}}</b>
         </div>
-        <div id="messagesContainer" class="flex-grow-1 p-3 overflow-auto">
-            <div v-if="loadingMessages" class="h-100 d-flex align-items-center justify-content-center">
+        <div class="flex-grow-1 d-flex align-items-end" style="height: 75vh">
+            <div v-if="loadingMessages" class="h-100 w-100 d-flex align-items-center justify-content-center">
                 <b-spinner variant="primary" label="Loading..."></b-spinner>
             </div>
-            <div v-else>
+            <div v-else class="w-100 h-100 p-3 overflow-auto" id="messagesContainer">
                 <div v-if="listMessages.length === 0" class="text-center">
                     <small><i>Start sending text messages to {{ receiver }}!</i></small>
                 </div>
@@ -37,6 +37,7 @@
 
 <script>
 import axios from "axios"
+
 var interval_refreshMsgs;
 var msgContainerScrolled = false;
 var msgContainer;
@@ -167,10 +168,6 @@ export default {
 </script>
 
 <style>
-#messagesContainer {
-    height: 75vh;
-}
-
 #chatbox input {
     box-shadow: none;
     background-color: #f3f3f3;
