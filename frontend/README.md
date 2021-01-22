@@ -1,4 +1,4 @@
-# frontend
+# typi-frontend
 
 ## Project setup
 ```

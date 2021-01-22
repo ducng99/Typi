@@ -33,8 +33,8 @@ app.post("/register", function (req, res)
 {
     if (CheckCredsValid(req.body.username, req.body.password))
     {
-        let sql = "INSERT INTO Users (Username, Password) VALUES (?, SHA2(?, 512));";
-        con.query(sql, [req.body.username, req.body.password], function (err, result)
+        let sql = "INSERT INTO Users (Username, Password, PublicKey) VALUES (?, SHA2(?, 512), ?);";
+        con.query(sql, [req.body.username, req.body.password, req.body.publicKey], function (err)
         {
             if (err)
             {

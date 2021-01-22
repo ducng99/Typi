@@ -11,7 +11,8 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 Vue.use(VueCookies)
 
-Vue.prototype.$COOKIE_SESSION_ID = "WebChat_Session_ID"
+Vue.prototype.$COOKIE_SESSION_ID = "Typi_Session_ID"
+Vue.prototype.$STORAGE_PRIVKEY = "Typi_Private_Key"
 
 new Vue({
   render: h => h(App),

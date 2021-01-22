@@ -11,6 +11,9 @@
                 <b-form-input type="password" v-model="reg_password" minlength="7"></b-form-input>
             </b-form-group>
             <b-button variant="primary" type="submit">Register</b-button>
+            <small class="d-block mt-2">
+                By clicking "Register" button above, your browser will generate a <b class="text-danger">private key</b> 🔑 and <b class="text-success">public key</b> 🔑. The <b class="text-danger">private key</b> 🔑 will be kept in your browser's local storage and the <b class="text-success">public key</b> 🔑 will be uploaded to our server.
+            </small>
         </b-form>
     </b-container>
 </div>
@@ -18,6 +21,7 @@
 
 <script>
 import axios from "axios"
+import NodeRSA from "node-rsa"
 
 export default {
     name: 'RegisterForm',
@@ -37,12 +41,15 @@ export default {
         onSubmit(event) {
             event.preventDefault();
             
-            axios.post("https://chat-backend.ducng.dev/register", {username: this.reg_username, password: this.reg_password})
+            let key = new NodeRSA({b: 1024});
+            
+            axios.post("https://chat-backend.ducng.dev/register", {username: this.reg_username, password: this.reg_password, publicKey: key.exportKey("pkcs8-public")})
                 .then(res => {                    
                     if (res.data.status)
                     {
                         this.reg_alertType = "success";
                         this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
+                        window.localStorage.setItem(this.$STORAGE_PRIVKEY, key.exportKey("pkcs8-private"));
                         this.$emit("loginCheck");
                     }
                     else
