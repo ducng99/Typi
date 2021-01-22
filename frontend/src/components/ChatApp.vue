@@ -18,9 +18,9 @@
                     </div>
                 </div>
                 <div class="mt-3" id="listFriends">
-                    <div class="d-flex p-2 rounded menu-entry align-items-center" v-if="pendingFriends.length > 0" @click="showListFriendsModal('Pending')">
+                    <div class="d-flex p-2 rounded menu-entry align-items-center justify-content-between" v-if="pendingFriends.length > 0" @click="showListFriendsModal('Pending')">
                         <b>Pending requests</b>
-                        <b-badge class="ml-auto" variant="info">{{ pendingFriends.length }}</b-badge>
+                        <b-badge variant="info">{{ pendingFriends.length }}</b-badge>
                     </div>
                     <div class="d-flex p-2 rounded menu-entry align-items-center" v-for="friend in acceptedFriends" :key="friend.Username" @click="onChatPick(friend.Username)">
                         <div class="d-inline-flex justify-content-center mr-3"><b-avatar :text="friend.Username.charAt(0)"></b-avatar></div>
@@ -85,10 +85,10 @@ export default {
         showListFriendsModal(type) {
             switch (type) {
                 case "Blocked":
-                    this.$refs.listFriendsModal.create("Blocked list", this.blockedFriends, type);
+                    this.$refs.listFriendsModal.create(this.blockedFriends, type);
                     break;
                 case "Pending":
-                    this.$refs.listFriendsModal.create("Pending requests", this.pendingFriends, type);
+                    this.$refs.listFriendsModal.create(this.pendingFriends, type);
                     break;
                 default:
                     break;

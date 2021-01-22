@@ -136,6 +136,14 @@ app.post("/verifySession", function (req, res)
     });
 });
 
+app.post("/keepAlive", function (req, res)
+{
+    SessionsHandler.KeepAlive(req.body.sessionID, data =>
+    {
+        res.send({ status: data.status });
+    });
+});
+
 app.post("/users/get", function (req, res)
 {
     SessionsHandler.GetSession(req.body.sessionID, data =>

@@ -1,12 +1,47 @@
 <template>
-    <div id="app">
+    <div id="app" class="d-none">
         <div v-if="!loggedIn">
             <center>
-                <h1>Typi</h1>
+                <h1><img src="./assets/typi-logo.png" style="height: 53px"/>ypi  (W.I.P)</h1>
                 <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>
             <RegisterForm v-if="showRegisterOrLogin" @loginCheck="CheckSession"/>
             <LoginForm v-if="!showRegisterOrLogin" @loginCheck="CheckSession"/>
+            
+            <b-container class="bg-white shadow rounded mt-3 p-3">
+                <div class="border rounded">
+                    <h3 v-b-toggle.instructions class="p-3 rounded-top bg-light mb-0">What is this?</h3>
+                    <b-collapse id="instructions">
+                        <div class="p-3 border-top">
+                            <b>Typi</b> 💬 is a simple web chat project features End-to-End Encryption.<br/><br/>
+                            When you register, a <b class="text-danger">private key</b> 🔑 and <b class="text-success">public key</b> 🔑 will be generated using your browser (RSA-512). Only your <b class="text-success">public key</b> will be uploaded to our server for encryption.<br/>
+                            Your private key will be stored in <b>local storage</b> in your browser, whenever you receive a message, your browser will decrypt the message using the <b class="text-danger">private key</b> and display it to you.<br/><br/>
+                            This way, neither us or your ISP can see the messages you send or receive.<br/><br/>
+                            We also use a cookie 🍪 to store your session ID. It expires after you close your browser or inactive for more than 15 minutes.<br/>
+                            You can clear your cookies 🍪 and <b class="text-danger">private key</b> 🔑 using the buttons above.
+                        </div>
+                    </b-collapse>
+                    <h3 v-b-toggle.disclaimer class="p-3 rounded-bottom bg-light mb-0 border-top">Disclaimer</h3>
+                    <b-collapse id="disclaimer">
+                        <div class="p-3 border-top">
+                            It is <b>your responsibility</b> to keep your <b class="text-danger">cookies 🍪/private key 🔑/browser/computer</b> safe from other people/organisations.<br/>
+                            We <b>do not</b> provide support if they have been compromised, stolen or lost.
+                        </div>
+                    </b-collapse>
+                    <h3 v-b-toggle.about_us class="p-3 rounded-bottom bg-light mb-0 border-top">About me</h3>
+                    <b-collapse id="about_us">
+                        <div class="p-3">
+                            My name is Duc, a job-less graduated (I am looking for a job 💼).<hr/>
+                            My contacts:<br/>
+                            <div class="mt-1">
+                                <a href="https://www.linkedin.com/in/ducng99/" target="_blank"><b-icon icon="linkedin" class="mr-2" font-scale="2"></b-icon></a>
+                                <a href="https://github.com/ducng99/" target="_blank"><b-icon icon="github" class="mr-2" font-scale="2"></b-icon></a>
+                                <a href="mailto:tom@ducng.dev" target="_blank"><b-icon icon="envelope-fill" font-scale="2"></b-icon></a>
+                            </div>
+                        </div>
+                    </b-collapse>
+                </div>
+            </b-container>
         </div>
         <ChatApp v-if="loggedIn" @loginCheck="CheckSession"/>
     </div>
@@ -43,6 +78,8 @@ export default {
                         {
                             console.error(res.data.msg);
                         }
+                        
+                        document.getElementById("app").classList.remove("d-none");
                     });
             }
         }
@@ -58,10 +95,6 @@ export default {
     font-family: Segoe UI Historic, Segoe UI, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    height: 100%;
-}
-
-html, body {
     height: 100vh;
 }
 

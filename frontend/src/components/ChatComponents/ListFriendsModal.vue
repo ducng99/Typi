@@ -32,8 +32,18 @@ export default {
         }
     },
     methods: {
-        create(title, list, type) {
-            this.title = title;
+        create(list, type) {
+            switch(type)
+            {
+                case "Pending":
+                    this.title = "Pending requests";
+                    break;
+                case "Blocked":
+                    this.title = "Blocked users";
+                    break;
+                default:
+                    break;
+            }
             this.listFriends = list;
             this.type = type;
             this.$bvModal.show("listFriendsModal");

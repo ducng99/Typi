@@ -201,5 +201,6 @@ export default {
 .outgoing_msg, .incoming_msg {
     border-radius: 18px;
     padding: 7px 12px 8px 12px;
+    max-width: 90%;
 }
 </style>

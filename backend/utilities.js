@@ -14,5 +14,5 @@ export function GenerateRandomString(length) {
 
 export function CheckCredsValid(username, password)
 {
-    return (username && password && RegExp("^(\\w|\\d){3,32}$").test(username) && password.length >= 6);
+    return (username && password && RegExp("^(\\w|\\d){3,32}$").test(username) && password.length >= 7);
 }
