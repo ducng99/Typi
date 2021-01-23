@@ -18,7 +18,6 @@
 
 <script>
 import axios from "axios"
-import NodeRSA from "node-rsa"
 
 export default {
     name: 'LoginForm',
@@ -37,8 +36,7 @@ export default {
         onSubmit(event) {
             event.preventDefault();
             
-            let key = new NodeRSA(this.privateKey);
-            if (key.isPrivate())
+            if (this.$crypto.isPrivate(this.privateKey))
             {
                 axios.post("https://chat-backend.ducng.dev/login", {username: this.log_username, password: this.log_password})
                 .then(res => {                    

@@ -2,10 +2,11 @@ import mysql from "mysql"
 import express from "express"
 import cors from "cors"
 import fs from "fs"
+import crypto from "crypto"
 
 import SessionsHandler from "./sessions"
 import UsersHandler from "./users"
-import { CheckCredsValid } from "./utilities"
+import { CheckCredsValid, GenerateRandomString } from "./utilities"
 
 var app = express();
 app.use(cors({ origin: RegExp("ducng\.dev|\w*\.ducng\.dev") }));
@@ -33,8 +34,11 @@ app.post("/register", function (req, res)
 {
     if (CheckCredsValid(req.body.username, req.body.password))
     {
-        let sql = "INSERT INTO Users (Username, Password, PublicKey) VALUES (?, SHA2(?, 512), ?);";
-        con.query(sql, [req.body.username, req.body.password, req.body.publicKey], function (err)
+        let passSalt = GenerateRandomString(32);
+        let encPassword = crypto.scryptSync(req.body.password, passSalt, 64, {N: 1024}).toString("hex");
+        
+        let sql = "INSERT INTO Users (Username, Password, PasswordSalt, PublicKey) VALUES (?, ?, ?, ?);";
+        con.query(sql, [req.body.username, encPassword, passSalt, req.body.publicKey], function (err)
         {
             if (err)
             {
@@ -75,8 +79,8 @@ app.post("/login", function (req, res)
 {
     if (CheckCredsValid(req.body.username, req.body.password))
     {
-        let sql = "SELECT * FROM Users WHERE Username = ? AND Password = SHA2(?, 512);";
-        con.query(sql, [req.body.username, req.body.password], function (err, result)
+        let sql = "SELECT Password, PasswordSalt FROM Users WHERE Username = ?";
+        con.query(sql, [req.body.username], function (err, result)
         {
             if (err)
             {
@@ -85,19 +89,24 @@ app.post("/login", function (req, res)
             }
             else
             {
-                if (result.length > 0)
+                if (result.length > 0 )
                 {
-                    SessionsHandler.CreateSession(req.body.username, (sessionID) =>
+                    let encPassword = crypto.scryptSync(req.body.password, result[0].PasswordSalt, 64, {N: 1024}).toString("hex");
+                    
+                    if (crypto.timingSafeEqual(Buffer.from(encPassword), Buffer.from(result[0].Password)))
                     {
-                        if (sessionID == null)
+                        SessionsHandler.CreateSession(req.body.username, (sessionID) =>
                         {
-                            res.send({ status: false, msg: "Unable to generate session ID. Please contact administrator." });
-                        }
-                        else
-                        {
-                            res.send({ status: true, msg: "Logged in successfully!", sessionID: sessionID });
-                        }
-                    });
+                            if (sessionID == null)
+                            {
+                                res.send({ status: false, msg: "Unable to generate session ID. Please contact administrator." });
+                            }
+                            else
+                            {
+                                res.send({ status: true, msg: "Logged in successfully!", sessionID: sessionID });
+                            }
+                        });
+                    }
                 }
                 else
                 {
@@ -287,12 +296,6 @@ setInterval(function ()
 app.use(function (req, res)
 {
     res.status(404).send({ error: 404, msg: 'Page not Found' });
-});
-
-// Handle 500
-app.use(function (error, req, res, next)
-{
-    res.status(500).send({ error: 500, msg: 'Internal server error' });
 });
 //-----------------------------------------------------------------------------------//
 // ERROR HANDLING - END

@@ -66,7 +66,6 @@
 <script>
 import axios from "axios"
 import {saveAs} from "file-saver"
-import NodeRSA from "node-rsa"
 
 import RegisterForm from './components/RegisterForm.vue'
 import LoginForm from './components/LoginForm.vue'
@@ -101,7 +100,7 @@ export default {
                         }
                         else
                         {
-                            console.error(res.data.msg);
+                            this.$cookies.remove(this.$COOKIE_SESSION_ID);
                         }
                         
                         this.checkingSession = false;
@@ -130,25 +129,13 @@ export default {
             saveAs(keyBlob, "typi_private_key.pem");
         },
         savePrivateKey() {
-            let key = new NodeRSA();
-            try {
-                key.importKey(this.showingPrivateKey, "pkcs8-private-pem");
-            
-                if (key.isPrivate())
-                {
-                    this.privateKey = this.showingPrivateKey;
-                    window.localStorage.setItem(this.$STORAGE_PRIV_KEY, this.privateKey);
-                }
-                else
-                {
-                    this.$bvToast.toast("Private key format is incorrect! Please check again.", {
-                        title: "Oops",
-                        autoHideDelay: 5000,
-                        appendToast: true,
-                        variant: "danger"
-                    });
-                }
-            } catch {
+            if (this.$crypto.isPrivate(this.showingPrivateKey))
+            {
+                this.privateKey = this.showingPrivateKey;
+                window.localStorage.setItem(this.$STORAGE_PRIV_KEY, this.privateKey);
+            }
+            else
+            {
                 this.$bvToast.toast("Private key format is incorrect! Please check again.", {
                     title: "Oops",
                     autoHideDelay: 5000,

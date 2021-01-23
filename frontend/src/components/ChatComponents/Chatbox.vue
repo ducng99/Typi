@@ -15,7 +15,7 @@
                 <div v-if="listMessages.length === 0" class="text-center">
                     <small><i>Start sending text messages to {{ receiver.Username }}!</i></small>
                 </div>
-                <div class="w-100" v-for="message in listMessages" :key="message.MessageID">
+                <div class="w-100" v-for="message in listMessages.slice().reverse()" :key="message.MessageID">
                     <div v-if="message.Sender === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-end">
                         <div class="outgoing_msg text-break" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                     </div>
@@ -50,6 +50,8 @@ export default {
     data() {
         return {
             listMessages: [],
+            listEncMessages: [],
+            decMessagesID: new Set(),
             receiver: {},
             loadingMessages: false
         }
@@ -106,13 +108,31 @@ export default {
                         {
                             let tmp = new Set();
                             
-                            this.listMessages = [...res.data.messages, ...this.listMessages].filter(entry => {
-                                if (tmp.has(entry.MessageID)) {
+                            this.listEncMessages = [...res.data.messages, ...this.listEncMessages].filter(entry => {
+                                if (tmp.has(entry.MessageID) || this.decMessagesID.has(entry.MessageID)) {
                                     return false;
                                 }
                                 tmp.add(entry.MessageID);
                                 return true;
+                            }).sort((a, b) => {
+                                return a.MessageID > b.MessageID;
                             });
+                            
+                            Promise.all(this.listEncMessages.map((entry, id) => {
+                                new Promise(resolve => {
+                                    let encKey = entry.Sender === this.currentUser.UserID ? entry.KeySender : entry.KeyReceiver;
+                                    
+                                    let decMsg = this.$crypto.decryptMessage(entry.Content, window.localStorage.getItem(this.$STORAGE_PRIVKEY), encKey, entry.IV, entry.AuthTag);
+                                    if (decMsg)
+                                    {
+                                        entry.Content = decMsg;
+                                        this.listMessages.push(entry);
+                                        this.decMessagesID.add(entry.MessageID);
+                                    }
+                                    
+                                    resolve();
+                                });
+                            }));
                             
                             this.loadingMessages = false;
                         }
@@ -134,11 +154,11 @@ export default {
             }
         },
         updateReceiver(newReceiver) {
-            console.log(newReceiver);
             if (newReceiver.UserID !== this.receiver.UserID) {
                 clearInterval(interval_refreshMsgs);
                 this.loadingMessages = true;
                 this.listMessages = [];
+                this.decMessagesID = new Set();
                 this.getMessages(newReceiver);
                 interval_refreshMsgs = setInterval(this.getMessages, 1000);
             }

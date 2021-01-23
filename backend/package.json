@@ -9,13 +9,12 @@
     "start": "nodemon index.js"
   },
   "author": "",
-  "license": "ISC",
+  "license": "AGPL-3.0",
   "dependencies": {
     "cors": "^2.8.5",
     "esm": "^3.2.25",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
-    "mysql": "^2.18.1",
-    "node-rsa": "^1.1.1"
+    "mysql": "^2.18.1"
   }
 }

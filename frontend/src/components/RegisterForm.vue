@@ -21,7 +21,6 @@
 
 <script>
 import axios from "axios"
-import NodeRSA from "node-rsa"
 
 export default {
     name: 'RegisterForm',
@@ -41,25 +40,25 @@ export default {
         onSubmit(event) {
             event.preventDefault();
             
-            let key = new NodeRSA({b: 1024});
+            let keys = this.$crypto.generateKeys();
             
-            axios.post("https://chat-backend.ducng.dev/register", {username: this.reg_username, password: this.reg_password, publicKey: key.exportKey("pkcs8-public")})
-                .then(res => {                    
-                    if (res.data.status)
-                    {
-                        this.reg_alertType = "success";
-                        this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
-                        window.localStorage.setItem(this.$STORAGE_PRIVKEY, key.exportKey("pkcs8-private"));
-                        this.$emit("loginCheck");
-                    }
-                    else
-                    {
-                        this.reg_alertType = "danger";
-                    }
-                    
-                    this.reg_alert = res.data.msg;
-                    this.reg_showAlert = true;
-                });
+            axios.post("https://chat-backend.ducng.dev/register", {username: this.reg_username, password: this.reg_password, publicKey: keys.publicKey})
+            .then(res => {                    
+                if (res.data.status)
+                {
+                    this.reg_alertType = "success";
+                    this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
+                    window.localStorage.setItem(this.$STORAGE_PRIVKEY, keys.privateKey);
+                    this.$emit("loginCheck");
+                }
+                else
+                {
+                    this.reg_alertType = "danger";
+                }
+                
+                this.reg_alert = res.data.msg;
+                this.reg_showAlert = true;
+            });
         }
     }
 }

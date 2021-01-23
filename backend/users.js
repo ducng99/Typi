@@ -173,7 +173,7 @@ class UsersHandler
      */
     GetMessages(userID, targetID, callback)
     {
-        let sql = "SELECT MessageID, Sender, Receiver, Content, KeyReceiver, IV, SendTime FROM `Messages` WHERE (Sender = ? AND Receiver = ?) OR (Receiver = ? AND Sender = ?) ORDER BY MessageID DESC LIMIT 50";
+        let sql = "SELECT * FROM `Messages` WHERE (Sender = ? AND Receiver = ?) OR (Receiver = ? AND Sender = ?) ORDER BY MessageID DESC LIMIT 40";
         this.con.query(sql, [userID, targetID, userID, targetID], function (err, results)
         {
             if (err)
@@ -202,9 +202,9 @@ class UsersHandler
             let user1 = senderID < receiverID ? senderID : receiverID;
             let user2 = user1 != senderID ? senderID : receiverID;
             
-            let sql = "INSERT INTO `Messages` (Sender, Receiver, Content, KeySender, KeyReceiver, IV, SendTime) SELECT ?, ?, ?, ?, ?, ?, ? WHERE (SELECT Status FROM `Relationships` WHERE User1 = ? AND User2 = ?) = 'Friends'";
+            let sql = "INSERT INTO `Messages` (Sender, Receiver, Content, KeySender, KeyReceiver, IV, AuthTag, SendTime) SELECT ?, ?, ?, ?, ?, ?, ?, ? WHERE (SELECT Status FROM `Relationships` WHERE User1 = ? AND User2 = ?) = 'Friends'";
             let time = Math.floor(Date.now() / 1000);
-            this.con.query(sql, [senderID, receiverID, encryptedData.message, encryptedData.keySender, encryptedData.keyReceiver, encryptedData.iv, time, user1, user2], function (err)
+            this.con.query(sql, [senderID, receiverID, encryptedData.message, encryptedData.keySender, encryptedData.keyReceiver, encryptedData.iv, encryptedData.authTag, time, user1, user2], function (err)
             {
                 if (err)
                 {
