@@ -11,7 +11,7 @@ class SessionsHandler
     {
         let sql = "INSERT INTO `Sessions` (SessionID, UserID, ExpireTime) VALUES (?, (SELECT UserID FROM `Users` WHERE Username = ?), ?);";
         let sessionID = GenerateRandomString(256);
-        let expireTime = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
+        let expireTime = Math.floor(Date.now() / 1000) + 60 * 15;
         this.con.query(sql, [sessionID, username, expireTime], function (err, result)
         {
             if (err)
@@ -30,7 +30,7 @@ class SessionsHandler
     {
         if (sessionID)
         {
-            let sql = "SELECT `Users`.UserID, Username FROM `Sessions`, `Users` WHERE SessionID = ? AND Sessions.UserID = Users.UserID";
+            let sql = "SELECT u.UserID, u.Username, u.PublicKey FROM `Sessions` s, `Users` u WHERE s.SessionID = ? AND s.UserID = u.UserID";
             this.con.query(sql, [sessionID], function (err, result)
             {
                 if (err)
@@ -58,8 +58,8 @@ class SessionsHandler
     {
         if (sessionID)
         {
-            let sql = "UPDATE Sessions SET ExpireTime = ? WHERE SessionID = ?";
-            let expireTime = Math.floor(Date.now() / 1000) + 60 * 5;
+            let sql = "UPDATE `Sessions` SET ExpireTime = ? WHERE SessionID = ?";
+            let expireTime = Math.floor(Date.now() / 1000) + 60 * 15;
 
             this.con.query(sql, [expireTime, sessionID], function (err)
             {

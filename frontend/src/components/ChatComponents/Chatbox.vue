@@ -1,11 +1,11 @@
 <template>
 <div class="h-100">
-    <div class="h-100 d-flex align-items-center justify-content-center" v-if="!receiver">
+    <div class="h-100 d-flex align-items-center justify-content-center" v-if="!receiver.Username">
         Choose a friend to start talking to!
     </div>
-    <div class="d-flex flex-column h-100" v-if="receiver">
+    <div class="d-flex flex-column h-100" v-if="receiver.Username">
         <div class="p-3 border-bottom position-relative shadow-sm">
-            Chat with <b>{{receiver}}</b>
+            Chat with <b>{{ receiver.Username }}</b>
         </div>
         <div class="flex-grow-1" style="height: 75vh">
             <div v-if="loadingMessages" class="h-100 d-flex align-items-center justify-content-center">
@@ -13,13 +13,13 @@
             </div>
             <div v-else class="w-100 h-100 d-flex flex-column-reverse p-3 overflow-auto" id="messagesContainer">
                 <div v-if="listMessages.length === 0" class="text-center">
-                    <small><i>Start sending text messages to {{ receiver }}!</i></small>
+                    <small><i>Start sending text messages to {{ receiver.Username }}!</i></small>
                 </div>
                 <div class="w-100" v-for="message in listMessages" :key="message.MessageID">
-                    <div v-if="message.Sender === myUserID" class="d-flex w-100 mb-1 justify-content-end">
+                    <div v-if="message.Sender === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-end">
                         <div class="outgoing_msg text-break" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                     </div>
-                    <div v-if="message.Receiver === myUserID" class="d-flex w-100 mb-1 justify-content-start">
+                    <div v-if="message.Receiver === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-start">
                         <div class="incoming_msg text-break" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                     </div>
                 </div>
@@ -45,12 +45,12 @@ var updatedReceiver = false;
 export default {
     name: 'Chatbox',
     props: {
-        myUserID: Number
+        currentUser: Object
     },
     data() {
         return {
             listMessages: [],
-            receiver: "",
+            receiver: {},
             loadingMessages: false
         }
     },
@@ -61,39 +61,44 @@ export default {
             let msgContent = msgBox.value;
             msgBox.value = "";
             
-            if (msgContent)
+            if (msgContent && this.receiver.UserID && this.receiver.PublicKey)
             {
-                axios.post("https://chat-backend.ducng.dev/users/sendMessage", {
-                    sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID),
-                    receiver: this.receiver,
-                    message: msgContent
-                }).then(res => {
-                    if (res.data.status)
-                    {
-                        this.getMessages();
-                    }
-                    else
-                    {
-                        this.$bvToast.hide();
-                        this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
-                            title: "Oops!",
-                            toaster: "b-toaster-top-center",
-                            solid: true,
-                            autoHideDelay: 5000,
-                            variant: "danger"
-                        });
-                        
-                        msgBox.value = msgContent;
-                    }
-                });
+                let encryptedMsg = this.$crypto.encryptMessage(msgContent, this.currentUser.PublicKey, this.receiver.PublicKey);
+                
+                if (encryptedMsg)
+                {
+                    axios.post("https://chat-backend.ducng.dev/users/sendMessage", {
+                        sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID),
+                        receiverID: this.receiver.UserID,
+                        encryptedMsg: encryptedMsg
+                    }).then(res => {
+                        if (res.data.status)
+                        {
+                            this.getMessages();
+                        }
+                        else
+                        {
+                            this.$bvToast.hide();
+                            this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
+                                title: "Oops!",
+                                toaster: "b-toaster-top-center",
+                                solid: true,
+                                autoHideDelay: 5000,
+                                variant: "danger"
+                            });
+                            
+                            msgBox.value = msgContent;
+                        }
+                    });
+                }
             }
         },
         getMessages(pReceiver = this.receiver) {
             let queue = ++getMessagesQueue;
             
-            if (pReceiver)
+            if (pReceiver.UserID)
             {
-                axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiver: pReceiver})
+                axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiverID: pReceiver.UserID})
                 .then(res => {
                     if (queue == getMessagesQueue)
                     {
@@ -129,7 +134,8 @@ export default {
             }
         },
         updateReceiver(newReceiver) {
-            if (newReceiver !== this.receiver) {
+            console.log(newReceiver);
+            if (newReceiver.UserID !== this.receiver.UserID) {
                 clearInterval(interval_refreshMsgs);
                 this.loadingMessages = true;
                 this.listMessages = [];

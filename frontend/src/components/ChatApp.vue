@@ -22,14 +22,14 @@
                         <b>Pending requests</b>
                         <b-badge variant="info">{{ pendingFriends.length }}</b-badge>
                     </div>
-                    <div class="d-flex p-2 rounded menu-entry align-items-center" v-for="friend in acceptedFriends" :key="friend.Username" @click="onChatPick(friend.Username)">
+                    <div class="d-flex p-2 rounded menu-entry align-items-center" v-for="friend in acceptedFriends" :key="friend.Username" @click="onChatPick(friend)">
                         <div class="d-inline-flex justify-content-center mr-3"><b-avatar :text="friend.Username.charAt(0)"></b-avatar></div>
                         <div class="d-inline-block">{{friend.Username}}</div>
                     </div>
                 </div>
             </b-col>
             <b-col cols="10" id="main" class="p-0">
-                <Chatbox ref="chatbox" :myUserID="currentUser.UserID"/>
+                <Chatbox ref="chatbox" :currentUser="currentUser"/>
             </b-col>
         </b-row>
         
@@ -44,6 +44,8 @@ import AddFriendModal from "./ChatComponents/AddFriendModal.vue"
 import Chatbox from "./ChatComponents/Chatbox.vue"
 import OptionsMenu from "./ChatComponents/OptionsMenu.vue"
 import ListFriendsModal from "./ChatComponents/ListFriendsModal.vue"
+
+var keepAliveInterval, updateFriendsListInterval;
 
 export default {
     name: 'ChatApp',
@@ -93,6 +95,17 @@ export default {
                 default:
                     break;
             }
+        },
+        keepAlive() {
+            keepAliveInterval = setInterval(() => {
+                axios.post("https://chat-backend.ducng.dev/keepAlive", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
+                .then(res => {
+                    if (!res.data.status)
+                    {
+                        console.error("Cannot send keep-alive request.");
+                    }
+                });
+            }, 60000 * 5);
         }
     },
     created() {
@@ -109,9 +122,21 @@ export default {
             });
         
         this.updateFriendsList();
-        setInterval(() => {
+        updateFriendsListInterval = setInterval(() => {
             this.updateFriendsList();
         }, 1000);
+        
+        this.keepAlive();
+    },
+    destroyed() {
+        clearInterval(updateFriendsListInterval);
+        clearInterval(keepAliveInterval);
+    },
+    onIdle() {
+        clearInterval(keepAliveInterval);
+    },
+    onActive() {
+        this.keepAlive();
     }
 }
 </script>

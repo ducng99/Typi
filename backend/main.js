@@ -3,9 +3,9 @@ import express from "express"
 import cors from "cors"
 import fs from "fs"
 
-import SessionsHandler from "./sessions.js"
+import SessionsHandler from "./sessions"
 import UsersHandler from "./users"
-import { CheckCredsValid } from "./utilities.js"
+import { CheckCredsValid } from "./utilities"
 
 var app = express();
 app.use(cors({ origin: RegExp("ducng\.dev|\w*\.ducng\.dev") }));
@@ -229,21 +229,11 @@ app.post("/users/getMessages", function (req, res)
     {
         if (data.status)
         {
-            UsersHandler.GetUserID(req.body.receiver, data2 =>
+            UsersHandler.GetMessages(data.user.UserID, req.body.receiverID, data2 =>
             {
                 if (data2.status)
                 {
-                    UsersHandler.GetMessages(data.user.UserID, data2.userID, data3 =>
-                    {
-                        if (data3.status)
-                        {
-                            res.send({ status: true, messages: data3.messages });
-                        }
-                        else
-                        {
-                            res.send({ status: false });
-                        }
-                    });
+                    res.send({ status: true, messages: data2.messages });
                 }
                 else
                 {
@@ -260,33 +250,20 @@ app.post("/users/getMessages", function (req, res)
 
 app.post("/users/sendMessage", function (req, res)
 {
-    if (req.body.message)
+    SessionsHandler.GetSession(req.body.sessionID, data =>
     {
-        SessionsHandler.GetSession(req.body.sessionID, data =>
+        if (data.status)
         {
-            if (data.status)
+            UsersHandler.SendMessage(data.user.UserID, req.body.receiverID, req.body.encryptedMsg, data2 =>
             {
-                UsersHandler.GetUserID(req.body.receiver, data2 =>
-                {
-                    if (data2.status)
-                    {
-                        UsersHandler.SendMessage(data.user.UserID, data2.userID, req.body.message, data3 =>
-                        {
-                            res.send({ status: data3.status });
-                        });
-                    }
-                    else
-                    {
-                        res.send({ status: false });
-                    }
-                });
-            }
-            else
-            {
-                res.send({ status: false });
-            }
-        });
-    }
+                res.send({ status: data2.status });
+            });
+        }
+        else
+        {
+            res.send({ status: false });
+        }
+    });
 });
 
 setInterval(function ()

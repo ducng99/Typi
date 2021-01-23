@@ -7,7 +7,7 @@ class UsersHandler
 
     GetFriends(userID, callback)
     {
-        let sql = "SELECT u.Username, r.Status, r.TargetUser FROM `Users` u, `Relationships` r WHERE (r.User1 = ? AND u.UserID = r.User2) OR (r.User2 = ? AND u.UserID = r.User1) ORDER BY u.Username";
+        let sql = "SELECT u.UserID, u.Username, u.PublicKey, r.Status, r.TargetUser FROM `Users` u, `Relationships` r WHERE (r.User1 = ? AND u.UserID = r.User2) OR (r.User2 = ? AND u.UserID = r.User1) ORDER BY u.Username";
         this.con.query(sql, [userID, userID], function (err, results)
         {
             if (err)
@@ -173,7 +173,7 @@ class UsersHandler
      */
     GetMessages(userID, targetID, callback)
     {
-        let sql = "SELECT * FROM `Messages` WHERE (Sender = ? AND Receiver = ?) OR (Receiver = ? AND Sender = ?) ORDER BY MessageID DESC LIMIT 20";
+        let sql = "SELECT MessageID, Sender, Receiver, Content, KeyReceiver, IV, SendTime FROM `Messages` WHERE (Sender = ? AND Receiver = ?) OR (Receiver = ? AND Sender = ?) ORDER BY MessageID DESC LIMIT 50";
         this.con.query(sql, [userID, targetID, userID, targetID], function (err, results)
         {
             if (err)
@@ -192,25 +192,35 @@ class UsersHandler
      * Send a message
      * @param {Number} senderID User ID of sender
      * @param {Number} receiverID User ID of receiver
-     * @param {String} content Message to be sent
+     * @param {Object} encryptedData Encrypted message data. Contains encrypted message, key for sender, key for receiver and iv
      * @param {Function} callback Callback function
      */
-    SendMessage(senderID, receiverID, content, callback)
+    SendMessage(senderID, receiverID, encryptedData, callback)
     {
-        let sql = "INSERT INTO `Messages` (Sender, Receiver, Content, SendTime) VALUES (?, ?, ?, ?)";
-        let time = Math.floor(Date.now() / 1000);
-        this.con.query(sql, [senderID, receiverID, content, time], function (err)
+        if (senderID && receiverID && encryptedData)
         {
-            if (err)
+            let user1 = senderID < receiverID ? senderID : receiverID;
+            let user2 = user1 != senderID ? senderID : receiverID;
+            
+            let sql = "INSERT INTO `Messages` (Sender, Receiver, Content, KeySender, KeyReceiver, IV, SendTime) SELECT ?, ?, ?, ?, ?, ?, ? WHERE (SELECT Status FROM `Relationships` WHERE User1 = ? AND User2 = ?) = 'Friends'";
+            let time = Math.floor(Date.now() / 1000);
+            this.con.query(sql, [senderID, receiverID, encryptedData.message, encryptedData.keySender, encryptedData.keyReceiver, encryptedData.iv, time, user1, user2], function (err)
             {
-                console.error(err);
-                callback({ status: false });
-            }
-            else
-            {
-                callback({ status: true });
-            }
-        });
+                if (err)
+                {
+                    console.error(err);
+                    callback({ status: false });
+                }
+                else
+                {
+                    callback({ status: true });
+                }
+            });
+        }
+        else
+        {
+            callback({status: false});
+        }
     }
 }
 
