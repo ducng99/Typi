@@ -19,6 +19,10 @@ app.listen(10000, () =>
 });
 
 var mysql_creds = JSON.parse(fs.readFileSync("/home/tom/mysql-creds.json"));
+var passwordSaltLength = 32;
+var passwordKeyLength = 64;
+var passwordCPUCost = 1024;
+var passwordOutputEncoding = "hex";
 
 var con = mysql.createPool({
     host: "localhost",
@@ -34,8 +38,8 @@ app.post("/register", function (req, res)
 {
     if (CheckCredsValid(req.body.username, req.body.password))
     {
-        let passSalt = GenerateRandomString(32);
-        let encPassword = crypto.scryptSync(req.body.password, passSalt, 64, {N: 1024}).toString("hex");
+        let passSalt = GenerateRandomString(passwordSaltLength);
+        let encPassword = crypto.scryptSync(req.body.password, passSalt, passwordKeyLength, {N: passwordCPUCost}).toString(passwordOutputEncoding);
         
         let sql = "INSERT INTO Users (Username, Password, PasswordSalt, PublicKey) VALUES (?, ?, ?, ?);";
         con.query(sql, [req.body.username, encPassword, passSalt, req.body.publicKey], function (err)
@@ -91,7 +95,7 @@ app.post("/login", function (req, res)
             {
                 if (result.length > 0 )
                 {
-                    let encPassword = crypto.scryptSync(req.body.password, result[0].PasswordSalt, 64, {N: 1024}).toString("hex");
+                    let encPassword = crypto.scryptSync(req.body.password, result[0].PasswordSalt, passwordKeyLength, {N: passwordCPUCost}).toString(passwordOutputEncoding);
                     
                     if (crypto.timingSafeEqual(Buffer.from(encPassword), Buffer.from(result[0].Password)))
                     {

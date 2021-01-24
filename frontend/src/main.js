@@ -23,5 +23,5 @@ var app = new Vue({
 
 Vue.use(IdleVue, {
   eventEmitter: app,
-  idleTime: 60000 * 5
+  idleTime: 60000
 })

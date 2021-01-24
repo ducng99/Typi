@@ -1,4 +1,6 @@
 const fs = require("fs");
+const incstr = require("incstr");
+const nextId = incstr.idGenerator();
 
 module.exports = {
     devServer: {
@@ -11,5 +13,18 @@ module.exports = {
             ca: fs.readFileSync('/home/tom/ssl_keys/chain.pem'),
         }
     },
-    outputDir: "/var/www/webchat/"
+    outputDir: "/var/www/webchat/",
+    css: {
+        requireModuleExtension: true,
+        loaderOptions: {
+            css: {
+                modules: {
+                    getLocalIdent: (context, localIdentName, localName, options) =>
+                    {
+                        return nextId();
+                    }
+                }
+            }
+        }
+      }
 };

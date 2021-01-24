@@ -3,7 +3,7 @@
         <div v-if="!loggedIn">
             <center>
                 <h1><img src="./assets/typi-logo.png" style="height: 53px"/>ypi  (W.I.P)</h1>
-                <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
+                <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" variant="primary" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>
             <RegisterForm v-if="showRegisterOrLogin" @loginCheck="CheckSession"/>
             <LoginForm v-if="!showRegisterOrLogin" @loginCheck="CheckSession" :privateKey="privateKey"/>
@@ -65,7 +65,6 @@
 
 <script>
 import axios from "axios"
-import {saveAs} from "file-saver"
 
 import RegisterForm from './components/RegisterForm.vue'
 import LoginForm from './components/LoginForm.vue'
@@ -81,7 +80,7 @@ export default {
             showRegisterOrLogin: false,  // false = login, true = register
             loggedIn: false,
             checkingSession: false,
-            privateKey: "You don't have a private key stored in this browser",
+            privateKey: "You don't have a private key stored in this browser. Import one or register a new account.",
             showingPrivateKey: "",
             hidePrivateKey: true,
             editablePrivateKey: false
@@ -126,7 +125,9 @@ export default {
         },
         downloadPrivateKey() {
             let keyBlob = new Blob([this.privateKey], { type: "text/plain;charset=utf-8" });
-            saveAs(keyBlob, "typi_private_key.pem");
+            import("file-saver").then(module => {
+                module.saveAs(keyBlob, "typi_private_key.pem");
+            })
         },
         savePrivateKey() {
             if (this.$crypto.isPrivate(this.showingPrivateKey))
@@ -168,15 +169,15 @@ export default {
 </script>
 
 <style>
+body
+{
+    background-color: #eee !important;
+}
+
 #app {
     font-family: Segoe UI Historic, Segoe UI, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     height: 100vh;
-}
-
-body
-{
-    background-color: #eee !important;
 }
 </style>

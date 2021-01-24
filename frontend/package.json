@@ -16,6 +16,7 @@
     "core-js": "^3.6.5",
     "file-saver": "^2.0.5",
     "idle-vue": "^2.0.5",
+    "incstr": "^1.2.3",
     "node-rsa": "^1.1.1",
     "vue": "^2.6.11",
     "vue-clickaway": "^2.2.2",

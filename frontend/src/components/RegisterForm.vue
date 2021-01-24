@@ -1,6 +1,6 @@
 <template>
 <div>
-    <b-container class="rounded shadow p-3" id="registerFormContainer">
+    <b-container class="rounded shadow p-3 bg-white">
         <h2 class="text-center">Register</h2>
         <b-alert v-model="reg_showAlert" :variant="reg_alertType" dismissible fade>{{ reg_alert }}</b-alert>
         <b-form @submit="onSubmit">
@@ -65,8 +65,5 @@ export default {
 </script>
 
 <style>
-#registerFormContainer
-{
-    background-color: #fff;
-}
+
 </style>

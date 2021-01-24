@@ -1,34 +1,34 @@
 <template>
-    <b-container fluid id="chatAppContainer" class="d-flex h-100 flex-column">
+    <b-container fluid class="d-flex h-100 flex-column">
         <b-row class="flex-grow-1">
-            <b-col cols="2" id="sidebar" class="p-3 border-right">
+            <b-col cols="2" :id="$style.sidebar" class="p-3 border-right">
                 <h2>Typi</h2>
                 <div class="d-flex align-items-center">
                     <div class="mr-auto">
                         Hi <b>{{currentUser.Username}}</b>.
                     </div>
-                    <div @click="$bvModal.show('addFriendModal')" class="button-icon">
+                    <div @click="$bvModal.show('addFriendModal')" :class="$style.button_icon">
                         <b-icon icon="person-plus-fill"></b-icon>
                     </div>
                     <div class="ml-1">
-                        <div @click="showMenu = !showMenu" class="button-icon">
+                        <div @click="showMenu = !showMenu" :class="$style.button_icon">
                             <b-icon icon="three-dots"></b-icon>
                         </div>
                         <OptionsMenu v-model="showMenu"/>
                     </div>
                 </div>
                 <div class="mt-3" id="listFriends">
-                    <div class="d-flex p-2 rounded menu-entry align-items-center justify-content-between" v-if="pendingFriends.length > 0" @click="showListFriendsModal('Pending')">
+                    <div :class="'d-flex p-2 rounded align-items-center justify-content-between ' + $style.menu_entry" v-if="pendingFriends.length > 0" @click="showListFriendsModal('Pending')">
                         <b>Pending requests</b>
                         <b-badge variant="info">{{ pendingFriends.length }}</b-badge>
                     </div>
-                    <div class="d-flex p-2 rounded menu-entry align-items-center" v-for="friend in acceptedFriends" :key="friend.Username" @click="onChatPick(friend)">
+                    <div :class="'d-flex p-2 rounded align-items-center ' + $style.menu_entry" v-for="friend in acceptedFriends" :key="friend.Username" @click="onChatPick(friend)">
                         <div class="d-inline-flex justify-content-center mr-3"><b-avatar :text="friend.Username.charAt(0)"></b-avatar></div>
                         <div class="d-inline-block">{{friend.Username}}</div>
                     </div>
                 </div>
             </b-col>
-            <b-col cols="10" id="main" class="p-0">
+            <b-col cols="10" :id="$style.main" class="p-0">
                 <Chatbox ref="chatbox" :currentUser="currentUser"/>
             </b-col>
         </b-row>
@@ -97,15 +97,19 @@ export default {
             }
         },
         keepAlive() {
+            this.sendKeepAlive();
             keepAliveInterval = setInterval(() => {
-                axios.post("https://chat-backend.ducng.dev/keepAlive", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
-                .then(res => {
-                    if (!res.data.status)
-                    {
-                        console.error("Cannot send keep-alive request.");
-                    }
-                });
-            }, 60000 * 5);
+                this.sendKeepAlive();
+            }, 60000);
+        },
+        sendKeepAlive() {
+            axios.post("https://chat-backend.ducng.dev/keepAlive", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
+            .then(res => {
+                if (!res.data.status)
+                {
+                    console.error("Cannot send keep-alive request.");
+                }
+            });
         }
     },
     created() {
@@ -141,12 +145,12 @@ export default {
 }
 </script>
 
-<style>
+<style module>
 #sidebar, #main {
     background-color: #fff;
 }
 
-.button-icon {
+.button_icon {
     cursor: pointer;
     height: 38px;
     width: 38px;
@@ -158,24 +162,24 @@ export default {
     transition: background-color 0.2s linear;
 }
 
-.button-icon:hover {
+.button_icon:hover {
     background-color: #e9e9e9;
 }
 
-.button-icon:active {
+.button_icon:active {
     background-color: #dbdcdd;
 }
 
-.disabled .button-icon, .button-icon.disabled {
+.disabled .button_icon, .button_icon.disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.disabled .button-icon:hover, .button-icon.disabled:hover {
+.disabled .button_icon:hover, .button_icon.disabled:hover {
     background-color: #e9e9e9;
 }
 
-.menu-entry {
+.menu_entry {
     cursor: pointer;
     transition: background-color 0.1s linear;
     -webkit-user-select: none;
@@ -185,11 +189,11 @@ export default {
     user-select: none;
 }
 
-.menu-entry:hover {
+.menu_entry:hover {
     background-color: #f3f3f3;
 }
 
-.menu-entry:active {
+.menu_entry:active {
     background-color: #e5e5e5;
 }
 </style>

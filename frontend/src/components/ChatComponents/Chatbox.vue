@@ -3,32 +3,32 @@
     <div class="h-100 d-flex align-items-center justify-content-center" v-if="!receiver.Username">
         Choose a friend to start talking to!
     </div>
-    <div class="d-flex flex-column h-100" v-if="receiver.Username">
+    <div v-if="loadingMessages" class="h-100 d-flex align-items-center justify-content-center">
+        <b-spinner variant="primary" label="Loading..."></b-spinner>
+    </div>
+    <div class="d-flex flex-column h-100" v-if="receiver.Username && !loadingMessages">
         <div class="p-3 border-bottom position-relative shadow-sm">
             Chat with <b>{{ receiver.Username }}</b>
         </div>
         <div class="flex-grow-1" style="height: 75vh">
-            <div v-if="loadingMessages" class="h-100 d-flex align-items-center justify-content-center">
-                <b-spinner variant="primary" label="Loading..."></b-spinner>
-            </div>
-            <div v-else class="w-100 h-100 d-flex flex-column-reverse p-3 overflow-auto" id="messagesContainer">
+            <div class="h-100 d-flex flex-column-reverse p-3 overflow-auto" :id="$style.messagesContainer">
                 <div v-if="listMessages.length === 0" class="text-center">
                     <small><i>Start sending text messages to {{ receiver.Username }}!</i></small>
                 </div>
-                <div class="w-100" v-for="message in listMessages.slice().reverse()" :key="message.MessageID">
+                <div v-for="message in listMessages" :key="message.MessageID">
                     <div v-if="message.Sender === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-end">
-                        <div class="outgoing_msg text-break" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                        <div :class="$style.outgoing_msg + ' text-break'" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                     </div>
                     <div v-if="message.Receiver === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-start">
-                        <div class="incoming_msg text-break" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                        <div :class="$style.incoming_msg + ' text-break'" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                     </div>
                 </div>
             </div>
         </div>
         <div id="chatbox" class="border-top p-2">
             <b-form inline @submit="sendMessage">
-                <b-input id="messageInput" class="flex-grow-1 rounded-pill mr-1" placeholder="Type..."/>
-                <div class="d-inline-flex rounded-circle justify-content-center" id="sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
+                <b-input :id="$style.messageInput" class="flex-grow-1 rounded-pill mr-1" placeholder="Type..."/>
+                <div class="d-inline-flex rounded-circle justify-content-center" :id="$style.sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
             </b-form>
         </div>
     </div>
@@ -38,7 +38,7 @@
 <script>
 import axios from "axios"
 
-var interval_refreshMsgs;
+var interval_refreshMsgs, interval_decryptMsgs;
 var getMessagesQueue = 0;
 var updatedReceiver = false;
 
@@ -59,7 +59,7 @@ export default {
     methods: {
         sendMessage(event) {
             event.preventDefault();
-            let msgBox = document.getElementById("messageInput");
+            let msgBox = document.getElementById(this.$style.messageInput);
             let msgContent = msgBox.value;
             msgBox.value = "";
             
@@ -85,7 +85,7 @@ export default {
                                 title: "Oops!",
                                 toaster: "b-toaster-top-center",
                                 solid: true,
-                                autoHideDelay: 5000,
+                                autoHideDelay: 3000,
                                 variant: "danger"
                             });
                             
@@ -103,38 +103,50 @@ export default {
                 axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiverID: pReceiver.UserID})
                 .then(res => {
                     if (queue == getMessagesQueue)
-                    {
+                    {                        
                         if (res.data.status)
-                        {
-                            let tmp = new Set();
-                            
+                        {                            
                             this.listEncMessages = [...res.data.messages, ...this.listEncMessages].filter(entry => {
-                                if (tmp.has(entry.MessageID) || this.decMessagesID.has(entry.MessageID)) {
-                                    return false;
-                                }
-                                tmp.add(entry.MessageID);
-                                return true;
-                            }).sort((a, b) => {
-                                return a.MessageID > b.MessageID;
+                                return !this.decMessagesID.has(entry.MessageID);
                             });
                             
-                            Promise.all(this.listEncMessages.map((entry, id) => {
-                                new Promise(resolve => {
-                                    let encKey = entry.Sender === this.currentUser.UserID ? entry.KeySender : entry.KeyReceiver;
-                                    
-                                    let decMsg = this.$crypto.decryptMessage(entry.Content, window.localStorage.getItem(this.$STORAGE_PRIVKEY), encKey, entry.IV, entry.AuthTag);
-                                    if (decMsg)
+                            if (this.listEncMessages.length > 0)
+                            {
+                                clearInterval(interval_decryptMsgs);
+                                interval_decryptMsgs = setInterval(() => {
+                                    if (this.listEncMessages.length > 0)
                                     {
-                                        entry.Content = decMsg;
-                                        this.listMessages.push(entry);
-                                        this.decMessagesID.add(entry.MessageID);
+                                        let entry = this.listEncMessages.pop();
+                                        if (!this.decMessagesID.has(entry.MessageID))
+                                        {
+                                            this.decMessagesID.add(entry.MessageID);
+                                            let encKey = entry.Sender === this.currentUser.UserID ? entry.KeySender : entry.KeyReceiver;
+                                            
+                                            this.$crypto.decryptMessage(entry.Content, window.localStorage.getItem(this.$STORAGE_PRIVKEY), encKey, entry.IV, entry.AuthTag).then(decMsg => {
+                                                if (decMsg)
+                                                {
+                                                    entry.Content = decMsg;
+                                                    this.listMessages.unshift(entry);
+                                                }
+                                                else
+                                                {
+                                                    console.error("Cannot decrypt message #" + entry.MessageID);
+                                                }
+                                            });
+                                        }
                                     }
-                                    
-                                    resolve();
-                                });
-                            }));
-                            
-                            this.loadingMessages = false;
+                                    else
+                                    {
+                                        this.listMessages = this.listMessages.sort((a, b) => {
+                                            return b.MessageID - a.MessageID;
+                                        });
+                                        
+                                        this.loadingMessages = false;
+                                        
+                                        clearInterval(interval_decryptMsgs);
+                                    }
+                                }, 0);
+                            }
                         }
                         else
                         {
@@ -155,6 +167,7 @@ export default {
         },
         updateReceiver(newReceiver) {
             if (newReceiver.UserID !== this.receiver.UserID) {
+                clearInterval(interval_decryptMsgs);
                 clearInterval(interval_refreshMsgs);
                 this.loadingMessages = true;
                 this.listMessages = [];
@@ -169,7 +182,7 @@ export default {
     updated() {
         if (updatedReceiver)
         {
-            document.getElementById("messageInput")?.focus();
+            document.getElementById(this.$style.messageInput)?.focus();
             updatedReceiver = false;
         }
     },
@@ -180,11 +193,12 @@ export default {
     },
     destroyed() {
         clearInterval(interval_refreshMsgs);
+        clearInterval(interval_decryptMsgs);
     }
 }
 </script>
 
-<style>
+<style module>
 #messageInput {
     box-shadow: none;
     background-color: #f3f3f3;

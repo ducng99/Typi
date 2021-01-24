@@ -1,7 +1,7 @@
 <template>
-<b-modal :title="title" id="listFriendsModal" hide-footer>
+<b-modal :title="title" :id="$style.listFriendsModal" hide-footer>
     <div>
-        <div v-for="user in listFriends" :key="user.Username" class="d-flex p-3 align-items-center rounded list-entry">
+        <div v-for="user in listFriends" :key="user.Username" :class="'d-flex p-3 align-items-center rounded ' + $style.list_entry">
             <b-avatar class="mr-3" :text="user.Username.charAt(0)"></b-avatar>
             <div class="mr-auto">{{ user.Username }}</div>
             <div class="button-icon mr-3" @click="updateRelationship(user.Username, 'Friends', $event)" v-if="type === 'Pending'">
@@ -46,7 +46,7 @@ export default {
             }
             this.listFriends = list;
             this.type = type;
-            this.$bvModal.show("listFriendsModal");
+            this.$bvModal.show(this.$style.listFriendsModal);
         },
         updateRelationship(targetUsername, rela, event) {
             let parentNode = event.currentTarget.parentElement;
@@ -82,17 +82,17 @@ export default {
 }
 </script>
 
-<style>
-#listFriendsModal .list-entry {
+<style module>
+#listFriendsModal .list_entry {
     transition: background-color 0.1s linear;
     user-select: none;
 }
 
-#listFriendsModal .list-entry:hover {
+#listFriendsModal .list_entry:hover {
     background-color: #f3f3f3;
 }
 
-#listFriendsModal .list-entry.disabled {
+#listFriendsModal .list_entry.disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
