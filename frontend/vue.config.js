@@ -1,6 +1,7 @@
 const fs = require("fs");
 const incstr = require("incstr");
 const nextId = incstr.idGenerator();
+var savedCssNames = {};
 
 module.exports = {
     devServer: {
@@ -21,10 +22,17 @@ module.exports = {
                 modules: {
                     getLocalIdent: (context, localIdentName, localName, options) =>
                     {
-                        return nextId();
+                        if (localName in savedCssNames)
+                        {
+                            return savedCssNames[localName];
+                        }
+                        
+                        let name = nextId();
+                        savedCssNames[localName] = name;
+                        return name;
                     }
                 }
             }
         }
-      }
+    }
 };

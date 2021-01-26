@@ -1,7 +1,7 @@
 <template>
     <b-container fluid class="d-flex h-100 flex-column">
         <b-row class="flex-grow-1">
-            <b-col cols="2" :id="$style.sidebar" class="p-3 border-right">
+            <b-col cols="2" class="p-3 border-right bg-white">
                 <h2>Typi</h2>
                 <div class="d-flex align-items-center">
                     <div class="mr-auto">
@@ -24,12 +24,15 @@
                     </div>
                     <div :class="'d-flex p-2 rounded align-items-center ' + $style.menu_entry" v-for="friend in acceptedFriends" :key="friend.Username" @click="onChatPick(friend)">
                         <div class="d-inline-flex justify-content-center mr-3"><b-avatar :text="friend.Username.charAt(0)"></b-avatar></div>
-                        <div class="d-inline-block">{{friend.Username}}</div>
+                        <div class="d-inline-block">{{ friend.Username }}</div>
                     </div>
                 </div>
             </b-col>
-            <b-col cols="10" :id="$style.main" class="p-0">
+            <b-col class="p-0 bg-white">
                 <Chatbox ref="chatbox" :currentUser="currentUser"/>
+            </b-col>
+            <b-col cols="2" class="border-left bg-white">
+                <ReceiverPanel receiver=""/>
             </b-col>
         </b-row>
         
@@ -44,13 +47,14 @@ import AddFriendModal from "./ChatComponents/AddFriendModal.vue"
 import Chatbox from "./ChatComponents/Chatbox.vue"
 import OptionsMenu from "./ChatComponents/OptionsMenu.vue"
 import ListFriendsModal from "./ChatComponents/ListFriendsModal.vue"
+import ReceiverPanel from "./ChatComponents/ReceiverPanel.vue"
 
 var keepAliveInterval, updateFriendsListInterval;
 
 export default {
     name: 'ChatApp',
     components: {
-        AddFriendModal, Chatbox, OptionsMenu, ListFriendsModal
+        AddFriendModal, Chatbox, OptionsMenu, ListFriendsModal, ReceiverPanel
     },
     data() {
         return {
@@ -98,6 +102,7 @@ export default {
         },
         keepAlive() {
             this.sendKeepAlive();
+            clearInterval(keepAliveInterval);
             keepAliveInterval = setInterval(() => {
                 this.sendKeepAlive();
             }, 60000);
@@ -146,10 +151,6 @@ export default {
 </script>
 
 <style module>
-#sidebar, #main {
-    background-color: #fff;
-}
-
 .button_icon {
     cursor: pointer;
     height: 38px;

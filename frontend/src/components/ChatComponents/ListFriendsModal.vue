@@ -50,7 +50,7 @@ export default {
         },
         updateRelationship(targetUsername, rela, event) {
             let parentNode = event.currentTarget.parentElement;
-            parentNode.classList.add("disabled");
+            parentNode.classList.add(this.$style.disabled);
             
             axios.post("https://chat-backend.ducng.dev/users/updateRelationship", {
                 sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID),
@@ -74,7 +74,7 @@ export default {
                         variant: "danger"
                     });
                     
-                    parentNode.classList.remove("disabled");
+                    parentNode.classList.remove(this.$style.disabled);
                 }
             });
         }
