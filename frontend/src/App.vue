@@ -2,7 +2,9 @@
     <div id="app" v-show="!this.checkingSession">
         <div v-if="!loggedIn">
             <center>
-                <h1><img src="./assets/typi-logo.png" style="height: 53px"/>ypi  (W.I.P)</h1>
+                <div class="d-flex align-items-center justify-content-center">
+                    <h1><img src="./assets/typi-logo.png" style="height: 53px"/>ypi  (W.I.P)</h1>
+                </div>
                 <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" variant="primary" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>
             <RegisterForm v-if="showRegisterOrLogin" @loginCheck="CheckSession"/>
@@ -57,7 +59,7 @@
                 </div>
             </b-container>
             
-            <div class="text-center mt-3"><small>Copyright © 2021 Duc Nguyen</small></div>
+            <div class="text-center mt-3"><small>Typi<br/>Copyright © 2021{{ new Date().getFullYear() == 2021 ? "" : "-" + new Date().getFullYear() }} Duc Nguyen</small></div>
         </div>
         <ChatApp v-if="loggedIn" @loginCheck="CheckSession"/>
     </div>

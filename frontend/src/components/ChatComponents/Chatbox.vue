@@ -3,8 +3,9 @@
     <div class="h-100 d-flex align-items-center justify-content-center" v-if="!receiver.Username">
         Choose a friend to start talking to!
     </div>
-    <div v-if="loadingMessages" class="h-100 d-flex align-items-center justify-content-center">
+    <div v-if="loadingMessages" class="h-100 d-flex flex-column align-items-center justify-content-center">
         <b-spinner variant="primary" label="Loading..."></b-spinner>
+        <small class="mt-1"><i>Decrypting messages...</i></small>
     </div>
     <div class="d-flex flex-column h-100" v-if="receiver.Username && !loadingMessages">
         <div class="p-3 border-bottom position-relative shadow-sm">
@@ -199,48 +200,4 @@ export default {
 </script>
 
 <style module>
-#messageInput {
-    box-shadow: none;
-    background-color: #f3f3f3;
-    border: none;
-    display: inline-block;
-    width: 100px;
-}
-
-#sendButton {
-    cursor: pointer;
-    color: blue;
-    width: 36px;
-    height: 36px;
-    align-items: center;
-    transition: background-color 0.1s linear;
-}
-
-#sendButton:hover {
-    background-color: #f3f3f3;
-}
-
-#sendButton:active {
-    background-color: #e5e5e5;
-}
-
-#sendButton svg {
-    width: 26px;
-    height: 26px;
-}
-
-.outgoing_msg {
-    background-color: #007bff;
-    color: white;
-}
-
-.incoming_msg {
-    background-color: #eee;
-}
-
-.outgoing_msg, .incoming_msg {
-    border-radius: 18px;
-    padding: 7px 12px 8px 12px;
-    max-width: 90%;
-}
 </style>

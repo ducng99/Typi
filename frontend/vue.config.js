@@ -14,7 +14,7 @@ module.exports = {
             ca: fs.readFileSync('/home/tom/ssl_keys/chain.pem'),
         }
     },
-    outputDir: "/var/www/webchat/",
+    outputDir: "/var/www/typi/",
     css: {
         requireModuleExtension: true,
         loaderOptions: {

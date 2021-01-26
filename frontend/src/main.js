@@ -7,6 +7,7 @@ import App from './App.vue'
 
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import styles from './style.module.css'
 
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
@@ -16,6 +17,7 @@ Vue.use(VueCookies)
 Vue.prototype.$COOKIE_SESSION_ID = "Typi_Session_ID"
 Vue.prototype.$STORAGE_PRIVKEY = "Typi_Private_Key"
 Vue.prototype.$crypto = CryptoTools;
+Vue.prototype.$style = styles;
 
 var app = new Vue({
   render: h => h(App),

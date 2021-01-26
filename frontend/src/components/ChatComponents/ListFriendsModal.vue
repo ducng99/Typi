@@ -4,10 +4,10 @@
         <div v-for="user in listFriends" :key="user.Username" :class="'d-flex p-3 align-items-center rounded ' + $style.list_entry">
             <b-avatar class="mr-3" :text="user.Username.charAt(0)"></b-avatar>
             <div class="mr-auto">{{ user.Username }}</div>
-            <div class="button-icon mr-3" @click="updateRelationship(user.Username, 'Friends', $event)" v-if="type === 'Pending'">
+            <div :class="$style.button_icon + ' mr-3'" @click="updateRelationship(user.Username, 'Friends', $event)" v-if="type === 'Pending'">
                 <b-icon icon="check" font-scale="1.5" variant="primary"></b-icon>
             </div>
-            <div class="button-icon" @click="updateRelationship(user.Username, 'None', $event)" v-if="RegExp('^(Pending|Blocked)$').test(type)">
+            <div :class="$style.button_icon" @click="updateRelationship(user.Username, 'None', $event)" v-if="RegExp('^(Pending|Blocked)$').test(type)">
                 <b-icon icon="x" font-scale="1.5" variant="danger"></b-icon>
             </div>
         </div>
@@ -83,17 +83,4 @@ export default {
 </script>
 
 <style module>
-#listFriendsModal .list_entry {
-    transition: background-color 0.1s linear;
-    user-select: none;
-}
-
-#listFriendsModal .list_entry:hover {
-    background-color: #f3f3f3;
-}
-
-#listFriendsModal .list_entry.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
 </style>

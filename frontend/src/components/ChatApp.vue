@@ -2,7 +2,9 @@
     <b-container fluid class="d-flex h-100 flex-column">
         <b-row class="flex-grow-1">
             <b-col cols="2" class="p-3 border-right bg-white">
-                <h2>Typi</h2>
+                <div class="d-flex align-items-center">
+                    <img src="../assets/typi-logo.png" style="height: 40px"/><h2>ypi</h2>
+                </div>
                 <div class="d-flex align-items-center">
                     <div class="mr-auto">
                         Hi <b>{{currentUser.Username}}</b>.
@@ -151,50 +153,5 @@ export default {
 </script>
 
 <style module>
-.button_icon {
-    cursor: pointer;
-    height: 38px;
-    width: 38px;
-    background-color: #f5f5f5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50px;
-    transition: background-color 0.2s linear;
-}
 
-.button_icon:hover {
-    background-color: #e9e9e9;
-}
-
-.button_icon:active {
-    background-color: #dbdcdd;
-}
-
-.disabled .button_icon, .button_icon.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.disabled .button_icon:hover, .button_icon.disabled:hover {
-    background-color: #e9e9e9;
-}
-
-.menu_entry {
-    cursor: pointer;
-    transition: background-color 0.1s linear;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-.menu_entry:hover {
-    background-color: #f3f3f3;
-}
-
-.menu_entry:active {
-    background-color: #e5e5e5;
-}
 </style>

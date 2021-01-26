@@ -1,6 +1,6 @@
 <template>
-<div v-if="value" class="position-absolute rounded p-2 mt-1 shadow" :id="$style.optionsMenu" v-on-clickaway="away">
-    <div class="py-2 px-3 rounded menu-entry d-flex align-items-center" @click="logout">
+<div v-if="value" class="position-absolute rounded p-2 mt-1 shadow bg-white" :id="$style.optionsMenu" v-on-clickaway="away">
+    <div :class="'py-2 px-3 rounded d-flex align-items-center ' + $style.menu_entry" @click="logout">
         <b-icon icon="box-arrow-right" class="mr-3"></b-icon>Logout
     </div>
 </div>
@@ -50,8 +50,4 @@ export default {
 </script>
 
 <style module>
-#optionsMenu {
-    z-index: 1;
-    background-color: #fff;
-}
 </style>
