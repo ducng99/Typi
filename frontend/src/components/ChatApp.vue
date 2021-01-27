@@ -33,9 +33,6 @@
             <b-col class="p-0 bg-white">
                 <Chatbox ref="chatbox" :currentUser="currentUser"/>
             </b-col>
-            <b-col cols="2" class="border-left bg-white">
-                <ReceiverPanel receiver=""/>
-            </b-col>
         </b-row>
         
         <ListFriendsModal ref="listFriendsModal"/>
@@ -49,14 +46,13 @@ import AddFriendModal from "./ChatComponents/AddFriendModal.vue"
 import Chatbox from "./ChatComponents/Chatbox.vue"
 import OptionsMenu from "./ChatComponents/OptionsMenu.vue"
 import ListFriendsModal from "./ChatComponents/ListFriendsModal.vue"
-import ReceiverPanel from "./ChatComponents/ReceiverPanel.vue"
 
 var keepAliveInterval, updateFriendsListInterval;
 
 export default {
     name: 'ChatApp',
     components: {
-        AddFriendModal, Chatbox, OptionsMenu, ListFriendsModal, ReceiverPanel
+        AddFriendModal, Chatbox, OptionsMenu, ListFriendsModal
     },
     data() {
         return {

@@ -3,7 +3,7 @@
         <div v-if="!loggedIn">
             <center>
                 <div class="d-flex align-items-center justify-content-center">
-                    <h1><img src="./assets/typi-logo.png" style="height: 53px"/>ypi  (W.I.P)</h1>
+                    <h1><img src="/typi-logo.png" style="height: 53px"/>ypi  (W.I.P)</h1>
                 </div>
                 <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" variant="primary" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>

@@ -7,37 +7,48 @@
         <b-spinner variant="primary" label="Loading..."></b-spinner>
         <small class="mt-1"><i>Decrypting messages...</i></small>
     </div>
-    <div class="d-flex flex-column h-100" v-if="receiver.Username && !loadingMessages">
-        <div class="p-3 border-bottom position-relative shadow-sm">
-            Chat with <b>{{ receiver.Username }}</b>
-        </div>
-        <div class="flex-grow-1" style="height: 75vh">
-            <div class="h-100 d-flex flex-column-reverse p-3 overflow-auto" :id="$style.messagesContainer">
-                <div v-if="listMessages.length === 0" class="text-center">
-                    <small><i>Start sending text messages to {{ receiver.Username }}!</i></small>
-                </div>
-                <div v-for="message in listMessages" :key="message.MessageID">
-                    <div v-if="message.Sender === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-end">
-                        <div :class="$style.outgoing_msg + ' text-break'" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
-                    </div>
-                    <div v-if="message.Receiver === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-start">
-                        <div :class="$style.incoming_msg + ' text-break'" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+    <div class="h-100" v-if="receiver.Username && !loadingMessages">
+        <b-row class="mx-0 h-100">
+            <b-col class="d-flex flex-column p-0">
+                <div class="d-flex align-items-center p-3 border-bottom shadow-sm">
+                    <b-avatar :text="receiver.Username.charAt(0)" class="mr-3"></b-avatar><b>{{ receiver.Username }}</b>
+                    <div class="ml-auto">
+                        <div :class="$style.button_icon" @click="() => { showReceiverInfo = !showReceiverInfo }"><b-icon icon="info-circle-fill" font-scale="1.5"/></div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div id="chatbox" class="border-top p-2">
-            <b-form inline @submit="sendMessage">
-                <b-input :id="$style.messageInput" class="flex-grow-1 rounded-pill mr-1" placeholder="Type..."/>
-                <div class="d-inline-flex rounded-circle justify-content-center" :id="$style.sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
-            </b-form>
-        </div>
+                <div class="flex-grow-1" style="height: 75vh">
+                    <div class="h-100 d-flex flex-column-reverse p-3 overflow-auto" :id="$style.messagesContainer">
+                        <div v-if="listMessages.length === 0" class="text-center">
+                            <small><i>Start sending text messages to {{ receiver.Username }}!</i></small>
+                        </div>
+                        <div v-for="message in listMessages" :key="message.MessageID">
+                            <div v-if="message.Sender === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-end">
+                                <div :class="$style.outgoing_msg + ' text-break'" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                            </div>
+                            <div v-if="message.Receiver === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-start">
+                                <div :class="$style.incoming_msg + ' text-break'" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="chatbox" class="border-top p-2">
+                    <b-form inline @submit="sendMessage">
+                        <b-input :id="$style.messageInput" class="flex-grow-1 rounded-pill mr-1" placeholder="Type..."/>
+                        <div class="d-inline-flex rounded-circle justify-content-center" :id="$style.sendButton"><b-icon icon="cursor-fill" rotate="45" variant="primary"></b-icon></div>
+                    </b-form>
+                </div>
+            </b-col>
+            <b-col v-if="showReceiverInfo" cols="2" class="border-left bg-white">
+                <ReceiverPanel :receiver="receiver"/>
+            </b-col>
+        </b-row>
     </div>
 </div>
 </template>
 
 <script>
 import axios from "axios"
+import ReceiverPanel from "./ReceiverPanel.vue"
 
 var interval_refreshMsgs, interval_decryptMsgs;
 var getMessagesQueue = 0;
@@ -45,6 +56,9 @@ var updatedReceiver = false;
 
 export default {
     name: 'Chatbox',
+    components: {
+        ReceiverPanel
+    },
     props: {
         currentUser: Object
     },
@@ -54,7 +68,8 @@ export default {
             listEncMessages: [],
             decMessagesID: new Set(),
             receiver: {},
-            loadingMessages: false
+            loadingMessages: false,
+            showReceiverInfo: true
         }
     },
     methods: {
