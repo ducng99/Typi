@@ -15,7 +15,7 @@ module.exports = {
             ca: fs.existsSync(sslPath + 'chain.pem') ? fs.readFileSync(sslPath + 'chain.pem') : "",
         }
     },
-    outputDir: "/var/www/typi/",
+    outputDir: fs.existsSync("/var/www/typi/") ? "/var/www/typi/" : "dist",
     css: {
         requireModuleExtension: true,
         loaderOptions: {
