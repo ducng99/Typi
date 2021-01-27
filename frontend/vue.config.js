@@ -2,6 +2,7 @@ const fs = require("fs");
 const incstr = require("incstr");
 const nextId = incstr.idGenerator();
 var savedCssNames = {};
+var sslPath = "/home/tom/ssl_keys/";
 
 module.exports = {
     devServer: {
@@ -9,9 +10,9 @@ module.exports = {
         port: 2053,
         disableHostCheck: true,
         https: {
-            key: fs.readFileSync('/home/tom/ssl_keys/privkey.pem'),
-            cert: fs.readFileSync('/home/tom/ssl_keys/cert.pem'),
-            ca: fs.readFileSync('/home/tom/ssl_keys/chain.pem'),
+            key: fs.existsSync(sslPath + 'privkey.pem') ? fs.readFileSync(sslPath + 'privkey.pem') : "",
+            cert: fs.existsSync(sslPath + 'cert.pem') ? fs.readFileSync(sslPath + 'cert.pem') : "",
+            ca: fs.existsSync(sslPath + 'chain.pem') ? fs.readFileSync(sslPath + 'chain.pem') : "",
         }
     },
     outputDir: "/var/www/typi/",
