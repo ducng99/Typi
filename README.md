@@ -13,10 +13,13 @@ We also use a cookie 🍪 to store your session ID. It expires after you close y
 
 ## TODO
 - Show info of receiver with options on the right side of chat panel.
+- Add encryption to private key
+- Hash password before sending to server
+- New messages update cycle ➡ Notifications
 - Add Dark mode/theme
 - Add online status (can be disabled)
 - Add emojis and maybe stickers
 
 ## Credits
-Created using Vue.js, Bootstrap(-Vue), Express.js and MySQL, and other plugins.<br/>
+Created using Vue.js, Bootstrap(-Vue), Express.js, MySQL, and other plugins.<br/>
 *:+1: And thanks to Stack Overflow members.*
