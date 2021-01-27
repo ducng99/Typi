@@ -1,7 +1,7 @@
 # Typi :speech_balloon: - a simple End-to-End Encryption web chat (W.I.P)
-<img src="https://typi.ducng.dev/typi-logo.png" alt="Typi logo" height="100px"/>
+<p align="center"><img src="https://typi.ducng.dev/typi-logo.png" alt="Typi logo" height="100px"/></p>
 
-![Frontend build](https://github.com/ducng99/Typi/workflows/Frontend%20build/badge.svg?branch=main)
+<p align="center"><img src="https://github.com/ducng99/Typi/workflows/Frontend%20build/badge.svg?branch=main"/></p>
 
 Fun project, ~~nothing else.~~
 
