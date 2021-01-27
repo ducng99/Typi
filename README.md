@@ -26,4 +26,5 @@ We also use a cookie 🍪 to store your session ID. It expires after you close y
 
 ## Credits
 Created using Vue.js, Bootstrap(-Vue), Express.js, MySQL, and other plugins.<br/>
-*:+1: And thanks to Stack Overflow members.*
+*:+1: And thanks to Stack Overflow members.*<br/>
+Logo made from an icon by <a href="https://www.flaticon.com/authors/becris" title="Becris">Becris</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
