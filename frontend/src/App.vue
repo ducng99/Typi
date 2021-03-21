@@ -3,7 +3,7 @@
         <div v-if="!loggedIn">
             <center>
                 <div class="d-flex align-items-center justify-content-center">
-                    <h1><img src="/typi-logo.png" style="height: 53px"/>ypi  (W.I.P)</h1>
+                    <h1><img src="/typi-logo.png" style="height: 53px"/>ypi  (WIP)</h1>
                 </div>
                 <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" variant="primary" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>
@@ -14,7 +14,7 @@
                 <b class="text-danger">Private key</b> 🔑:
                 <b-textarea v-model="showingPrivateKey" class="mt-1 mb-2" :readonly="!editablePrivateKey"></b-textarea>
                 <div class="d-flex">
-                    <b-button @click="toggleShowPrivateKey()" :variant="this.hidePrivateKey ? 'danger' : ''">{{ this.hidePrivateKey ? 'Show' : 'Hide' }}</b-button>
+                    <b-button @click="toggleShowPrivateKey()" :variant="hidePrivateKey ? 'danger' : ''">{{ hidePrivateKey ? 'Show' : 'Hide' }}</b-button>
                     <b-button class="ml-2 mr-auto" @click="toggleEditPrivateKey">Edit</b-button>
                     <b-button variant="info" class="mr-2" @click="downloadPrivateKey" v-b-tooltip.hover title="Keep the key safe">Download</b-button>
                     <b-button :disabled="!editablePrivateKey" variant="primary" @click="savePrivateKey">Save</b-button>
@@ -40,7 +40,7 @@
                     <h3 v-b-toggle.disclaimer class="p-3 rounded-bottom bg-light mb-0 border-top">Disclaimer</h3>
                     <b-collapse id="disclaimer">
                         <div class="p-3">
-                            It is <b>your responsibility</b> to keep your <b class="text-danger">cookies 🍪/private key 🔑/browser/computer</b> safe from other people/organisations.<br/>
+                            It is <b>your responsibility</b> to keep your <b class="text-danger">password/cookies 🍪/private key 🔑/browser/computer</b> safe from other people or organisations.<br/>
                             We <b>do not</b> provide support if they have been compromised, stolen or lost.
                         </div>
                     </b-collapse>
@@ -59,7 +59,7 @@
                 </div>
             </b-container>
             
-            <div class="text-center mt-3"><small>Typi<br/>Copyright © 2021{{ new Date().getFullYear() == 2021 ? "" : "-" + new Date().getFullYear() }} Duc Nguyen</small></div>
+            <div class="text-center mt-3"><small>Typi (Alpha)<br/>Copyright © 2021{{ new Date().getFullYear() == 2021 ? "" : "-" + new Date().getFullYear() }} Duc Nguyen</small></div>
         </div>
         <ChatApp v-if="loggedIn" @loginCheck="CheckSession"/>
     </div>

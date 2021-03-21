@@ -9,7 +9,7 @@ import UsersHandler from "./users"
 import { CheckCredsValid, GenerateRandomString } from "./utilities"
 
 var app = express();
-app.use(cors({ origin: RegExp("ducng\.dev|\w*\.ducng\.dev") }));
+app.use(cors({ origin: RegExp("ducng\.dev|\w*\.ducng\.dev|localhost|127.0.0.1") }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

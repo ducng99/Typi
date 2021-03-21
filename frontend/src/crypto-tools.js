@@ -1,13 +1,15 @@
 /**
  * Encryption support module for Typi.
  * 
- * Credit: https://github.com/nodejs/node-v0.x-archive/issues/6386#issuecomment-31817919
- *         https://www.techengineer.one/how-to-encrypt-decrypt-with-aes-ccm-gcm-in-node-js/
+ * Credits: https://github.com/nodejs/node-v0.x-archive/issues/6386#issuecomment-31817919
+ *          https://www.techengineer.one/how-to-encrypt-decrypt-with-aes-ccm-gcm-in-node-js/
+ *          https://github.com/rzcoder/node-rsa
+ *          https://github.com/ranisalt/node-argon2
  */
 
 import crypto from 'crypto'
 import NodeRSA from "node-rsa"
-import { promisify } from "util"
+import argon2 from "argon2"
 
 var algorithm = 'aes-256-gcm';
 var inputEncoding = 'utf8';
@@ -74,7 +76,7 @@ export default {
 
             return { message: ciphered, keySender: encryptedKeySender, keyReceiver: encryptedKeyReceiver, iv: iv.toString(outputEncoding), authTag: cipher.getAuthTag().toString(outputEncoding) };
         }
-        catch (e)
+        catch
         {
             return false;
         }
@@ -97,5 +99,20 @@ export default {
                 });
             }
         );
+    },
+    
+    async hashPassword(password, salt = null)
+    {
+        try
+        {
+            let hashed = await argon2.hash(password, {salt: salt});
+            hashed = hashed.split("$");
+            
+            return { password: hashed[5], salt: hashed[4] }
+        }
+        catch
+        {
+            return false;
+        }
     }
 }
