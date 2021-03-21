@@ -18,7 +18,7 @@ export default function Login(props) {
         .then(res => {
             if (res.data.status)
             {
-                global.SESSION_ID = res.data.sessionID;
+                global.SStorage.SetItem(global.SESSION_ID, res.data.sessionID);
                 props.loginCheck();
             }
             else
@@ -37,19 +37,18 @@ export default function Login(props) {
             <Text style={[{display: showResponse ? 'flex' : 'none'}, styles.responseText]}>{responseContent}</Text>
             <TextInput label="Username" style={{marginBottom: 5}} onChangeText={username => setUsername(username)}></TextInput>
             <TextInput secureTextEntry={true} label="Password" onChangeText={password => setPassword(password)}></TextInput>
-            <Button mode="contained" style={{marginTop: 10}} contentStyle={{height: 50}} onPress={OnLogin} loading={loggingIn}>Login</Button>
+            <Button mode="contained" style={{marginTop: 10}} contentStyle={{height: 50}} onPress={OnLogin} loading={loggingIn} disabled={loggingIn}>Login</Button>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     loginContainer: {
-        margin: 10,
+        marginHorizontal: 15,
     },
     loginText: {
         fontSize: 24,
         marginBottom: 20,
-        marginTop: 50,
         textAlign: 'center'
     },
     responseText: {
