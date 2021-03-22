@@ -54,8 +54,39 @@ export default {
             return false;
         }
     },
+    
+    encryptAESWithKey(message, key)
+    {
+        try
+        {
+            let iv = crypto.randomBytes(ivLength);
+            let keyBytes = Buffer.from(key, inputEncoding);
+            let cipher = crypto.createCipheriv(algorithm, keyBytes, iv);
+            let ciphered = cipher.update(message, inputEncoding, outputEncoding);
+            ciphered += cipher.final(outputEncoding);
 
-    encryptMessage(message, senderPublicKey, receiverPublicKey)
+            return { message: ciphered, iv: iv.toString(outputEncoding), authTag: cipher.getAuthTag().toString(outputEncoding) };
+        }
+        catch
+        {
+            return false;
+        }
+    },
+    
+    decryptAESWithKey(message, key, iv, authTag)
+    {
+        return new Promise(resolve => {
+            let iv_buf = Buffer.from(iv, outputEncoding);
+            let decipher = crypto.createDecipheriv(algorithm, key, iv_buf);
+            decipher.setAuthTag(Buffer.from(authTag, outputEncoding));
+            let deciphered = decipher.update(message, outputEncoding, inputEncoding);
+            deciphered += decipher.final(inputEncoding);
+            
+            resolve(deciphered);
+        });
+    },
+
+    encryptMessage(message, receiverPublicKey)
     {
         try
         {
@@ -66,15 +97,12 @@ export default {
             ciphered += cipher.final(outputEncoding);
 
             let keys = new NodeRSA();
-            let encryptedKeySender, encryptedKeyReceiver;
-
-            keys.importKey(senderPublicKey, "public");
-            encryptedKeySender = keys.encrypt(key, "base64");
+            let encryptedKeyReceiver;
 
             keys.importKey(receiverPublicKey, "public");
             encryptedKeyReceiver = keys.encrypt(key, "base64");
 
-            return { message: ciphered, keySender: encryptedKeySender, keyReceiver: encryptedKeyReceiver, iv: iv.toString(outputEncoding), authTag: cipher.getAuthTag().toString(outputEncoding) };
+            return { message: ciphered, keyReceiver: encryptedKeyReceiver, iv: iv.toString(outputEncoding), authTag: cipher.getAuthTag().toString(outputEncoding) };
         }
         catch
         {

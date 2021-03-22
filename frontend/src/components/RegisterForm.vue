@@ -40,15 +40,12 @@ export default {
         onSubmit(event) {
             event.preventDefault();
             
-            let keys = this.$crypto.generateKeys();
-            
-            axios.post("https://chat-backend.ducng.dev/register", {username: this.reg_username, password: this.reg_password, publicKey: keys.publicKey})
+            axios.post("https://chat-backend.ducng.dev/register", {username: this.reg_username, password: this.reg_password})
             .then(res => {                    
                 if (res.data.status)
                 {
                     this.reg_alertType = "success";
                     this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
-                    window.localStorage.setItem(this.$STORAGE_PRIVKEY, keys.privateKey);
                     this.$emit("loginCheck");
                 }
                 else

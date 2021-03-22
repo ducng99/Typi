@@ -21,9 +21,6 @@ import axios from "axios"
 
 export default {
     name: 'LoginForm',
-    props: {
-        privateKey: String
-    },
     data() {
         return {
             log_username: '',
@@ -36,27 +33,19 @@ export default {
         onSubmit(event) {
             event.preventDefault();
             
-            if (this.$crypto.isPrivate(this.privateKey))
-            {
-                axios.post("https://chat-backend.ducng.dev/login", {username: this.log_username, password: this.log_password})
-                .then(res => {                    
-                    if (res.data.status)
-                    {
-                        this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
-                        this.$emit("loginCheck");
-                    }
-                    else
-                    {
-                        this.log_showAlert = true;
-                        this.log_alert = res.data.msg;
-                    }
-                });
-            }
-            else
-            {
-                this.log_showAlert = true;
-                this.log_alert = "Your private key is not in the correct format. Please check again";
-            }
+            axios.post("https://chat-backend.ducng.dev/login", {username: this.log_username, password: this.log_password})
+            .then(res => {                    
+                if (res.data.status)
+                {
+                    this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
+                    this.$emit("loginCheck");
+                }
+                else
+                {
+                    this.log_showAlert = true;
+                    this.log_alert = res.data.msg;
+                }
+            });
         }
     }
 }

@@ -6,7 +6,6 @@ var sslPath = "/home/tom/ssl_keys/";
 
 module.exports = {
     devServer: {
-        public: "ducng.dev:2053",
         port: 2053,
         disableHostCheck: true,
         https: {

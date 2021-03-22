@@ -8,17 +8,10 @@
                 <b-button @click="(event) => {showRegisterOrLogin = !showRegisterOrLogin}" variant="primary" class="m-3">{{showRegisterOrLogin ? "Login" : "Register"}}</b-button>
             </center>
             <RegisterForm v-if="showRegisterOrLogin" @loginCheck="CheckSession"/>
-            <LoginForm v-if="!showRegisterOrLogin" @loginCheck="CheckSession" :privateKey="privateKey"/>
+            <LoginForm v-if="!showRegisterOrLogin" @loginCheck="CheckSession"/>
             
-            <b-container class="rounded shadow p-3 mt-3 bg-white">
-                <b class="text-danger">Private key</b> 🔑:
-                <b-textarea v-model="showingPrivateKey" class="mt-1 mb-2" :readonly="!editablePrivateKey"></b-textarea>
-                <div class="d-flex">
-                    <b-button @click="toggleShowPrivateKey()" :variant="hidePrivateKey ? 'danger' : ''">{{ hidePrivateKey ? 'Show' : 'Hide' }}</b-button>
-                    <b-button class="ml-2 mr-auto" @click="toggleEditPrivateKey">Edit</b-button>
-                    <b-button variant="info" class="mr-2" @click="downloadPrivateKey" v-b-tooltip.hover title="Keep the key safe">Download</b-button>
-                    <b-button :disabled="!editablePrivateKey" variant="primary" @click="savePrivateKey">Save</b-button>
-                </div>
+            <b-container class="bg-white shadow rounded mt-3 p-3">
+                Typi is updating on how messages are encrypted to be more secure!
             </b-container>
             
             <b-container class="bg-white shadow rounded mt-3 p-3">
@@ -27,7 +20,7 @@
                     <b-collapse id="instructions">
                         <div class="p-3">
                             <b>Typi</b> 💬 is a simple web chat project features End-to-End Encryption (using hybrid encryption).<br/><br/>
-                            When you register, a <b class="text-danger">private key</b> 🔑 and a <b class="text-success">public key</b> 🔑 will be generated using your browser (RSA-1024). Only your <b class="text-success">public key</b> 🔑 will be uploaded to our server for encryption and your <b class="text-danger">private key</b> 🔑 will be stored in <b>local storage</b> in your browser.<br/>
+                            <s>When you register,</s> a <b class="text-danger">private key</b> 🔑 and a <b class="text-success">public key</b> 🔑 will be generated using your browser (RSA-1024). Only your <b class="text-success">public key</b> 🔑 will be uploaded to our server for encryption and your <b class="text-danger">private key</b> 🔑 will be stored in <b>local storage</b> in your browser.<br/>
                             Whenever you receive a message, your browser will decrypt an <b class="text-info">AES key</b> using your <b class="text-danger">private key</b> 🔑, decrypt the message with that <b class="text-info">AES key</b> and then display it to you.<br/>
                             And vice versa, the message you sent will be encrypted using a randomly generated <b class="text-info">AES key</b>, that key will be encrypted using the receiver's <b class="text-success">public key</b>🔑 and the encrypted message with encrypted key will be saved on our server.<br/><br/>
                             This way, neither us or your ISP can see the messages you send or receive.<br/><br/>
@@ -81,11 +74,7 @@ export default {
         return {
             showRegisterOrLogin: false,  // false = login, true = register
             loggedIn: false,
-            checkingSession: false,
-            privateKey: "You don't have a private key stored in this browser. Import one or register a new account.",
-            showingPrivateKey: "",
-            hidePrivateKey: true,
-            editablePrivateKey: false
+            checkingSession: false
         }
     },
     methods: {
@@ -107,65 +96,13 @@ export default {
                         this.checkingSession = false;
                     });
             }
-        },
-        toggleShowPrivateKey(state = null) {
-            this.hidePrivateKey = (state !== null ? state : !this.hidePrivateKey);
-            
-            if (this.hidePrivateKey)
-            {
-                this.showingPrivateKey = Array(this.privateKey.length + 1).join("*");
-                this.editablePrivateKey = false;
-            }
-            else
-            {
-                this.showingPrivateKey = this.privateKey;
-            }
-        },
-        toggleEditPrivateKey() {
-            this.editablePrivateKey = !this.editablePrivateKey;
-            this.toggleShowPrivateKey(false);
-        },
-        downloadPrivateKey() {
-            let keyBlob = new Blob([this.privateKey], { type: "text/plain;charset=utf-8" });
-            import("file-saver").then(module => {
-                module.saveAs(keyBlob, "typi_private_key.pem");
-            })
-        },
-        savePrivateKey() {
-            if (this.$crypto.isPrivate(this.showingPrivateKey))
-            {
-                this.privateKey = this.showingPrivateKey;
-                window.localStorage.setItem(this.$STORAGE_PRIV_KEY, this.privateKey);
-            }
-            else
-            {
-                this.$bvToast.toast("Private key format is incorrect! Please check again.", {
-                    title: "Oops",
-                    autoHideDelay: 5000,
-                    appendToast: true,
-                    variant: "danger"
-                });
-            }
         }
     },
     created() {
         this.CheckSession();
     },
     mounted() {
-        let privKey = window.localStorage.getItem(this.$STORAGE_PRIVKEY);
-        if (privKey)
-        {
-            this.privateKey = privKey;
-        }
         
-        if (this.hidePrivateKey)
-        {
-            this.showingPrivateKey = Array(this.privateKey.length + 1).join("*");
-        }
-        else
-        {
-            this.showingPrivateKey = this.privateKey;
-        }
     }
 }
 </script>
