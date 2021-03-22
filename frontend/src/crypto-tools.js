@@ -9,7 +9,7 @@
 
 import crypto from 'crypto'
 import NodeRSA from "node-rsa"
-import argon2 from "argon2"
+import argon2 from "argon2-browser"
 
 var algorithm = 'aes-256-gcm';
 var inputEncoding = 'utf8';
@@ -133,10 +133,17 @@ export default {
     {
         try
         {
-            let hashed = await argon2.hash(password, {salt: salt});
-            hashed = hashed.split("$");
+            if (!salt)
+            {
+                salt = crypto.randomBytes(16).toString('hex');
+            }
             
-            return { password: hashed[5], salt: hashed[4] }
+            let hashed = await argon2.hash({
+                pass: password,
+                salt: salt
+            });
+            
+            return { password: hashed.encoded, salt: salt }
         }
         catch
         {

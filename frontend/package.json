@@ -10,9 +10,10 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "argon2": "^0.27.1",
+    "argon2-browser": "^1.15.3",
     "aws-sdk": "^2.868.0",
     "axios": "^0.21.1",
+    "base64-loader": "^1.0.0",
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.5",

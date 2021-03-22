@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "typi-mobile",
-    "slug": "Typi",
+    "name": "Typi",
+    "slug": "typi-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/typi-logo.png",
@@ -20,6 +20,8 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "dev.ducng.typi",
+      "versionCode": 202103221,
       "adaptiveIcon": {
         "foregroundImage": "./assets/typi-logo.png",
         "backgroundColor": "#FFFFFF"

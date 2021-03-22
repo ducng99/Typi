@@ -34,5 +34,17 @@ module.exports = {
                 }
             }
         }
+    },
+    configureWebpack: {
+        module: {
+            noParse: /\.wasm$/,
+            rules: [
+                {
+                    test: /\.wasm$/,
+                    loader: 'base64-loader',
+                    type: 'javascript/auto',
+                },
+            ],
+        }
     }
 };
