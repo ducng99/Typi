@@ -7,7 +7,7 @@ class UsersHandler
 
     GetFriends(userID, callback)
     {
-        let sql = "SELECT u.UserID, u.Username, u.PublicKey, r.Status, r.TargetUser FROM `Users` u, `Relationships` r WHERE (r.User1 = ? AND u.UserID = r.User2) OR (r.User2 = ? AND u.UserID = r.User1) ORDER BY u.Username";
+        let sql = "SELECT u.UserID, u.Username, r.Status, r.TargetUser FROM `Users` u, `Relationships` r WHERE (r.User1 = ? AND u.UserID = r.User2) OR (r.User2 = ? AND u.UserID = r.User1) ORDER BY u.Username";
         this.con.query(sql, [userID, userID], function (err, results)
         {
             if (err)

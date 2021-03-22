@@ -9,7 +9,7 @@ import UsersHandler from "./users"
 import { CheckCredsValid, GenerateRandomString } from "./utilities"
 
 var app = express();
-app.use(cors({ origin: RegExp("ducng\.dev|\w*\.ducng\.dev|localhost|127.0.0.1") }));
+app.use(cors({ origin: RegExp("ducng\.dev|\w+\.ducng\.dev|localhost") }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -18,7 +18,7 @@ app.listen(10000, () =>
     console.log("Started webchat backend on port 10000");
 });
 
-var mysql_creds = JSON.parse(fs.readFileSync("/home/tom/mysql-creds.json"));
+var mysql_creds = JSON.parse(fs.readFileSync("../../mysql-creds.json"));
 var passwordSaltLength = 32;
 var passwordKeyLength = 64;
 var passwordCPUCost = 1024;
@@ -41,8 +41,8 @@ app.post("/register", function (req, res)
         let passSalt = GenerateRandomString(passwordSaltLength);
         let encPassword = crypto.scryptSync(req.body.password, passSalt, passwordKeyLength, {N: passwordCPUCost}).toString(passwordOutputEncoding);
         
-        let sql = "INSERT INTO Users (Username, Password, PasswordSalt, PublicKey) VALUES (?, ?, ?, ?);";
-        con.query(sql, [req.body.username, encPassword, passSalt, req.body.publicKey], function (err)
+        let sql = "INSERT INTO Users (Username, Password, PasswordSalt) VALUES (?, ?, ?);";
+        con.query(sql, [req.body.username, encPassword, passSalt], function (err)
         {
             if (err)
             {
