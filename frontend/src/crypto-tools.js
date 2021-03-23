@@ -4,7 +4,6 @@
  * Credits: https://github.com/nodejs/node-v0.x-archive/issues/6386#issuecomment-31817919
  *          https://www.techengineer.one/how-to-encrypt-decrypt-with-aes-ccm-gcm-in-node-js/
  *          https://github.com/rzcoder/node-rsa
- *          https://github.com/ranisalt/node-argon2
  */
 
 import crypto from 'crypto'
@@ -18,7 +17,7 @@ var keyLength = 32;
 var outputEncoding = 'hex';
 
 export default {
-    generateKeys()
+    async generateKeys()
     {
         let keys = new NodeRSA({b: 1024});
         
@@ -60,7 +59,7 @@ export default {
         try
         {
             let iv = crypto.randomBytes(ivLength);
-            let keyBytes = Buffer.from(key, inputEncoding);
+            let keyBytes = Buffer.from(key, 'hex');
             let cipher = crypto.createCipheriv(algorithm, keyBytes, iv);
             let ciphered = cipher.update(message, inputEncoding, outputEncoding);
             ciphered += cipher.final(outputEncoding);
@@ -77,7 +76,8 @@ export default {
     {
         return new Promise(resolve => {
             let iv_buf = Buffer.from(iv, outputEncoding);
-            let decipher = crypto.createDecipheriv(algorithm, key, iv_buf);
+            let keyBytes = Buffer.from(key, 'hex');
+            let decipher = crypto.createDecipheriv(algorithm, keyBytes, iv_buf);
             decipher.setAuthTag(Buffer.from(authTag, outputEncoding));
             let deciphered = decipher.update(message, outputEncoding, inputEncoding);
             deciphered += decipher.final(inputEncoding);

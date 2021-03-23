@@ -18,6 +18,7 @@
 
 <script>
 import axios from "axios"
+import crypto from 'crypto'
 
 export default {
     name: 'LoginForm',
@@ -37,7 +38,7 @@ export default {
             .then(res => {                    
                 if (res.data.status)
                 {
-                    this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
+                    this.$passwordHashed = crypto.createHash('sha256').update(this.log_password).digest('hex');
                     this.$emit("loginCheck");
                 }
                 else

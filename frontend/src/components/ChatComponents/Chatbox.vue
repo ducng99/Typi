@@ -86,7 +86,6 @@ export default {
                 if (encryptedMsg)
                 {
                     axios.post("https://chat-backend.ducng.dev/users/sendMessage", {
-                        sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID),
                         receiverID: this.receiver.UserID,
                         encryptedMsg: encryptedMsg
                     }).then(res => {
@@ -116,7 +115,7 @@ export default {
             
             if (pReceiver.UserID)
             {
-                axios.post("https://chat-backend.ducng.dev/users/getMessages", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), receiverID: pReceiver.UserID})
+                axios.post("https://chat-backend.ducng.dev/users/getMessages", {receiverID: pReceiver.UserID})
                 .then(res => {
                     if (queue == getMessagesQueue)
                     {                        

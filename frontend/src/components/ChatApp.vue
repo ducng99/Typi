@@ -7,7 +7,7 @@
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="mr-auto">
-                        Hi <b>{{currentUser.Username}}</b>.
+                        Hi <b>{{ currentUser.Username }}</b>.
                     </div>
                     <div @click="$bvModal.show('addFriendModal')" :class="$style.button_icon">
                         <b-icon icon="person-plus-fill"></b-icon>
@@ -42,10 +42,13 @@
 
 <script>
 import axios from "axios"
+import SecureStorage from '../SecureStorage'
 import AddFriendModal from "./ChatComponents/AddFriendModal.vue"
 import Chatbox from "./ChatComponents/Chatbox.vue"
 import OptionsMenu from "./ChatComponents/OptionsMenu.vue"
 import ListFriendsModal from "./ChatComponents/ListFriendsModal.vue"
+
+axios.defaults.withCredentials = true;
 
 var keepAliveInterval, updateFriendsListInterval;
 
@@ -65,7 +68,7 @@ export default {
     },
     methods: {
         updateFriendsList() {
-            axios.post("https://chat-backend.ducng.dev/users/getFriends", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
+            axios.get("https://chat-backend.ducng.dev/users/getFriends")
                 .then(res => {
                     if (res.data.status)
                     {
@@ -106,17 +109,23 @@ export default {
             }, 60000);
         },
         sendKeepAlive() {
-            axios.post("https://chat-backend.ducng.dev/keepAlive", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
+            axios.get("https://chat-backend.ducng.dev/keepAlive")
             .then(res => {
                 if (!res.data.status)
                 {
                     console.error("Cannot send keep-alive request.");
                 }
             });
+        },
+        syncPublicKeys() {
+            if (!SecureStorage.HasItem(this.$STORAGE_KEYS))
+            {
+                
+            }
         }
     },
     created() {
-        axios.post("https://chat-backend.ducng.dev/users/get", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
+        axios.post("https://chat-backend.ducng.dev/users/get")
             .then(res => {
                 if (res.data.status)
                 {

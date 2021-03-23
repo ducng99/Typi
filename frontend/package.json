@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "argon2-browser": "^1.15.3",
-    "aws-sdk": "^2.868.0",
     "axios": "^0.21.1",
     "base64-loader": "^1.0.0",
     "bootstrap": "^4.5.3",

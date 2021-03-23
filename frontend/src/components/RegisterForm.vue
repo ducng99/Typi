@@ -45,7 +45,7 @@ export default {
                 if (res.data.status)
                 {
                     this.reg_alertType = "success";
-                    this.$cookies.set(this.$COOKIE_SESSION_ID, res.data.sessionID, 0);
+                    this.$passwordHashed = crypto.createHash('sha256').update(this.reg_password).digest('hex');
                     this.$emit("loginCheck");
                 }
                 else

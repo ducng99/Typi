@@ -65,6 +65,8 @@ import RegisterForm from './components/RegisterForm.vue'
 import LoginForm from './components/LoginForm.vue'
 import ChatApp from './components/ChatApp.vue'
 
+axios.defaults.withCredentials = true;
+
 export default {
     name: 'App',
     components: {
@@ -82,19 +84,20 @@ export default {
             if (this.$cookies.isKey(this.$COOKIE_SESSION_ID))
             {
                 this.checkingSession = true;
-                axios.post("https://chat-backend.ducng.dev/verifySession", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
-                    .then(res => {
-                        if (res.data.status)
-                        {
-                            this.loggedIn = true;
-                        }
-                        else
-                        {
-                            this.$cookies.remove(this.$COOKIE_SESSION_ID);
-                        }
-                        
-                        this.checkingSession = false;
-                    });
+                axios.get("https://chat-backend.ducng.dev/verifySession")
+                .then(res => {
+                    if (res.data.status)
+                    {
+                        this.loggedIn = true;
+                    }
+                    else
+                    {
+                        this.$cookies.remove(this.$COOKIE_SESSION_ID);
+                        this.$passwordHashed = '';
+                    }
+                    
+                    this.checkingSession = false;
+                });
             }
         }
     },
