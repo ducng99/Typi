@@ -3,6 +3,7 @@ import express from "express"
 import cors from "cors"
 import fs from "fs"
 import crypto from "crypto"
+import cookieParser from 'cookie-parser'
 
 import SessionsHandler from "./sessions"
 import UsersHandler from "./users"
@@ -12,6 +13,7 @@ var app = express();
 app.use(cors({ origin: RegExp("ducng\.dev|\w+\.ducng\.dev|localhost") }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.listen(10000, () =>
 {
@@ -23,6 +25,7 @@ var passwordSaltLength = 32;
 var passwordKeyLength = 64;
 var passwordCPUCost = 1024;
 var passwordOutputEncoding = "hex";
+const COOKIE_SESSION_ID = "Typi_Session_ID";
 
 var con = mysql.createPool({
     host: "localhost",
@@ -66,7 +69,7 @@ app.post("/register", function (req, res)
                     }
                     else
                     {
-                        res.send({ status: true, msg: "Successfully registered user " + req.body.username + "!", sessionID: sessionID });
+                        res.cookie(COOKIE_SESSION_ID, sessionID, {secure: true, httpOnly: true}).send({ status: true, msg: "Successfully registered user " + req.body.username + "!" });
                         console.log("User " + req.body.username + " created.");
                     }
                 });
@@ -107,7 +110,7 @@ app.post("/login", function (req, res)
                             }
                             else
                             {
-                                res.send({ status: true, msg: "Logged in successfully!", sessionID: sessionID });
+                                res.cookie(COOKIE_SESSION_ID, sessionID, {secure: true , httpOnly: true}).send({ status: true, msg: "Logged in successfully!" });
                             }
                         });
                     }
@@ -125,9 +128,9 @@ app.post("/login", function (req, res)
     }
 });
 
-app.post("/logout", function (req, res)
+app.get("/logout", function (req, res)
 {
-    con.query("DELETE FROM `Sessions` WHERE SessionID = ?", [req.body.sessionID], (err) =>
+    con.query("DELETE FROM `Sessions` WHERE SessionID = ?", [req.cookies[COOKIE_SESSION_ID]], (err) =>
     {
         if (err)
         {
@@ -139,35 +142,35 @@ app.post("/logout", function (req, res)
             res.send({ status: true });
         }
     })
-})
+});
 
-app.post("/verifySession", function (req, res)
+app.get("/verifySession", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
     {
         res.send({ status: data.status });
     });
 });
 
-app.post("/keepAlive", function (req, res)
+app.get("/keepAlive", function (req, res)
 {
-    SessionsHandler.KeepAlive(req.body.sessionID, data =>
+    SessionsHandler.KeepAlive(req.cookies[COOKIE_SESSION_ID], data =>
     {
         res.send({ status: data.status });
     });
 });
 
-app.post("/users/get", function (req, res)
+app.get("/users/get", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
     {
         res.send({ status: data.status, user: data.user });
     });
 });
 
-app.post("/users/getFriends", function (req, res)
+app.get("/users/getFriends", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
     {
         if (data.status)
         {
@@ -192,7 +195,7 @@ app.post("/users/getFriends", function (req, res)
 
 app.post("/users/addFriend", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
     {
         if (data.status)
         {
@@ -210,7 +213,7 @@ app.post("/users/addFriend", function (req, res)
 
 app.post("/users/updateRelationship", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
     {
         if (data.status)
         {
@@ -238,7 +241,7 @@ app.post("/users/updateRelationship", function (req, res)
 
 app.post("/users/getMessages", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
     {
         if (data.status)
         {
@@ -263,7 +266,7 @@ app.post("/users/getMessages", function (req, res)
 
 app.post("/users/sendMessage", function (req, res)
 {
-    SessionsHandler.GetSession(req.body.sessionID, data =>
+    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
     {
         if (data.status)
         {
