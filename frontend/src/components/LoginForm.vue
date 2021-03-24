@@ -19,6 +19,7 @@
 <script>
 import axios from "axios"
 import crypto from 'crypto'
+import SecureStorage from '../SecureStorage'
 
 export default {
     name: 'LoginForm',
@@ -38,7 +39,9 @@ export default {
             .then(res => {                    
                 if (res.data.status)
                 {
-                    this.$passwordHashed = crypto.createHash('sha256').update(this.log_password).digest('hex');
+                    import('../SecureStorage').then(SecureStorage => {
+                        SecureStorage.passwordHash = crypto.createHash('sha256').update(this.log_password).digest('hex');
+                    });
                     this.$emit("loginCheck");
                 }
                 

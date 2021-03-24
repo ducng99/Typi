@@ -42,22 +42,22 @@
 
 <script>
 import axios from "axios"
+import User from '../models/User'
 import SecureStorage from '../SecureStorage'
-import AddFriendModal from "./ChatComponents/AddFriendModal.vue"
-import Chatbox from "./ChatComponents/Chatbox.vue"
-import OptionsMenu from "./ChatComponents/OptionsMenu.vue"
-import ListFriendsModal from "./ChatComponents/ListFriendsModal.vue"
 
 var keepAliveInterval, updateFriendsListInterval;
 
 export default {
     name: 'ChatApp',
     components: {
-        AddFriendModal, Chatbox, OptionsMenu, ListFriendsModal
+        AddFriendModal: () => import("./ChatComponents/AddFriendModal.vue"),
+        Chatbox: () => import("./ChatComponents/Chatbox.vue"),
+        OptionsMenu: () => import("./ChatComponents/OptionsMenu.vue"),
+        ListFriendsModal: () => import("./ChatComponents/ListFriendsModal.vue")
     },
     data() {
         return {
-            currentUser: {},
+            currentUser: User,
             acceptedFriends: [],
             blockedFriends: [],
             pendingFriends: [],
@@ -127,7 +127,7 @@ export default {
         .then(res => {
             if (res.data.status)
             {
-                this.currentUser = res.data.user;
+                this.currentUser = User.Init(res.data.user);
             }
             else
             {

@@ -91,7 +91,9 @@ export default {
                 else
                 {
                     this.$cookies.remove(this.$COOKIE_SESSION_ID);
-                    this.$passwordHashed = '';
+                    import('../SecureStorage').then(SecureStorage => {
+                        SecureStorage.passwordHash = '';
+                    });
                 }
                 
                 this.checkingSession = false;
