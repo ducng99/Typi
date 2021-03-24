@@ -92,7 +92,7 @@ export default {
                 {
                     this.$cookies.remove(this.$COOKIE_SESSION_ID);
                     import('./SecureStorage').then(SecureStorage => {
-                        SecureStorage.passwordHash = '';
+                        SecureStorage.default.passwordHash = '';
                     });
                 }
                 
