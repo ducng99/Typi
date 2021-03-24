@@ -1,8 +1,10 @@
 import CryptoTools from './crypto-tools'
 
-export default {
-    passwordHash,
-    
+let passwordHash = '';
+
+export {passwordHash}
+
+export default {    
     SaveItem(key, value)
     {
         if (key && value)
