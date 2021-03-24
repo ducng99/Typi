@@ -34,7 +34,7 @@ export default {
         onSubmit(event) {
             event.preventDefault();
             
-            axios.post("https://chat-backend.ducng.dev/login", {username: this.log_username, password: this.log_password, sender: location.hostname })
+            axios.post("https://chat-backend.ducng.dev/creds/login", {username: this.log_username, password: this.log_password, sender: location.hostname })
             .then(res => {                    
                 if (res.data.status)
                 {
