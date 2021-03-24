@@ -10,7 +10,10 @@ import UsersHandler from "./users"
 import { CheckCredsValid, GenerateRandomString } from "./utilities"
 
 var app = express();
-app.use(cors({ origin: RegExp("ducng\.dev|\w+\.ducng\.dev|localhost") }));
+app.use(cors({
+    origin: ["https://ducng.dev", "https://ducng.dev:2053", /\.ducng\.dev$/],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -69,7 +72,7 @@ app.post("/register", function (req, res)
                     }
                     else
                     {
-                        res.cookie(COOKIE_SESSION_ID, sessionID, {secure: true, httpOnly: true}).send({ status: true, msg: "Successfully registered user " + req.body.username + "!" });
+                        res.cookie(COOKIE_SESSION_ID, sessionID, {secure: true, domain: req.body.sender, httpOnly: true}).send({ status: true, msg: "Successfully registered user " + req.body.username + "!" });
                         console.log("User " + req.body.username + " created.");
                     }
                 });
@@ -110,9 +113,13 @@ app.post("/login", function (req, res)
                             }
                             else
                             {
-                                res.cookie(COOKIE_SESSION_ID, sessionID, {secure: true , httpOnly: true}).send({ status: true, msg: "Logged in successfully!" });
+                                res.cookie(COOKIE_SESSION_ID, sessionID, {secure: true, domain: req.body.sender, httpOnly: true }).send({ status: true, msg: "Logged in successfully!" });
                             }
                         });
+                    }
+                    else
+                    {
+                        res.send({ status: false, msg: "Username or password not valid!" });
                     }
                 }
                 else

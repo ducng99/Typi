@@ -81,24 +81,18 @@ export default {
     },
     methods: {
         CheckSession() {            
-            if (this.$cookies.isKey(this.$COOKIE_SESSION_ID))
-            {
-                this.checkingSession = true;
-                axios.get("https://chat-backend.ducng.dev/verifySession")
-                .then(res => {
-                    if (res.data.status)
-                    {
-                        this.loggedIn = true;
-                    }
-                    else
-                    {
-                        this.$cookies.remove(this.$COOKIE_SESSION_ID);
-                        this.$passwordHashed = '';
-                    }
-                    
-                    this.checkingSession = false;
-                });
-            }
+            axios.get("https://chat-backend.ducng.dev/verifySession")
+            .then(res => {
+                if (res.data.status)
+                {
+                    this.loggedIn = true;
+                }
+                else
+                {
+                    this.$cookies.remove(this.$COOKIE_SESSION_ID);
+                    this.$passwordHashed = '';
+                }
+            });
         }
     },
     created() {

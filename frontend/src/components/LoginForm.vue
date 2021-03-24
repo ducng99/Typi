@@ -34,18 +34,16 @@ export default {
         onSubmit(event) {
             event.preventDefault();
             
-            axios.post("https://chat-backend.ducng.dev/login", {username: this.log_username, password: this.log_password})
+            axios.post("https://chat-backend.ducng.dev/login", {username: this.log_username, password: this.log_password, sender: location.hostname })
             .then(res => {                    
                 if (res.data.status)
                 {
                     this.$passwordHashed = crypto.createHash('sha256').update(this.log_password).digest('hex');
                     this.$emit("loginCheck");
                 }
-                else
-                {
-                    this.log_showAlert = true;
-                    this.log_alert = res.data.msg;
-                }
+                
+                this.log_showAlert = true;
+                this.log_alert = res.data.msg;
             });
         }
     }

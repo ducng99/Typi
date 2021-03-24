@@ -30,7 +30,7 @@ class SessionsHandler
     {
         if (sessionID)
         {
-            let sql = "SELECT u.UserID, u.Username, u.PublicKey FROM `Sessions` s, `Users` u WHERE s.SessionID = ? AND s.UserID = u.UserID";
+            let sql = "SELECT u.UserID, u.Username FROM `Sessions` s, `Users` u WHERE s.SessionID = ? AND s.UserID = u.UserID";
             this.con.query(sql, [sessionID], function (err, result)
             {
                 if (err)
