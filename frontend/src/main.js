@@ -18,7 +18,6 @@ Vue.prototype.$COOKIE_SESSION_ID = "Typi_Session_ID";
 Vue.prototype.$STORAGE_KEYS = "Typi_Keys";
 Vue.prototype.$crypto = CryptoTools;
 Vue.prototype.$style = styles;
-Vue.prototype.$passwordHashed = '';
 
 var app = new Vue({
   render: h => h(App),

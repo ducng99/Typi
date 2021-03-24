@@ -45,7 +45,9 @@ export default {
                 if (res.data.status)
                 {
                     this.reg_alertType = "success";
-                    this.$passwordHashed = crypto.createHash('sha256').update(this.reg_password).digest('hex');
+                    import('../SecureStorage').then(SecureStorage => {
+                        SecureStorage.passwordHash = crypto.createHash('sha256').update(this.reg_password).digest('hex');
+                    });
                     this.$emit("loginCheck");
                 }
                 else
