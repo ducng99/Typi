@@ -1,5 +1,7 @@
 import express from 'express'
+import SessionsHandler from '../sessions'
 
+const COOKIE_SESSION_ID = "Typi_Session_ID";
 const router = express.Router();
 
 router.get("/verifySession", function (req, res)

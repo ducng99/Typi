@@ -1,18 +1,14 @@
+import MySQL from './database'
 import { GenerateRandomString } from "./utilities.js"
 
 class SessionsHandler
 {
-    constructor()
-    {
-        this.con;
-    }
-
     CreateSession(username, callback)
     {
         let sql = "INSERT INTO `Sessions` (SessionID, UserID, ExpireTime) VALUES (?, (SELECT UserID FROM `Users` WHERE Username = ?), ?);";
         let sessionID = GenerateRandomString(256);
         let expireTime = Math.floor(Date.now() / 1000) + 60 * 15;
-        this.con.query(sql, [sessionID, username, expireTime], function (err, result)
+        MySQL.query(sql, [sessionID, username, expireTime], function (err, result)
         {
             if (err)
             {
@@ -31,7 +27,7 @@ class SessionsHandler
         if (sessionID)
         {
             let sql = "SELECT u.UserID, u.Username FROM `Sessions` s, `Users` u WHERE s.SessionID = ? AND s.UserID = u.UserID";
-            this.con.query(sql, [sessionID], function (err, result)
+            MySQL.query(sql, [sessionID], function (err, result)
             {
                 if (err)
                 {
@@ -61,7 +57,7 @@ class SessionsHandler
             let sql = "UPDATE `Sessions` SET ExpireTime = ? WHERE SessionID = ?";
             let expireTime = Math.floor(Date.now() / 1000) + 60 * 15;
 
-            this.con.query(sql, [expireTime, sessionID], function (err)
+            MySQL.query(sql, [expireTime, sessionID], function (err)
             {
                 if (err)
                 {
@@ -74,6 +70,21 @@ class SessionsHandler
                 }
             });
         }
+    }
+    
+    ClearOldSessions()
+    {
+        MySQL.query("DELETE FROM `Sessions` WHERE ExpireTime < ?", [Math.floor(Date.now() / 1000)], function (err)
+        {
+            if (err)
+            {
+                console.error(err);
+            }
+            else
+            {
+                console.info("Cleared sessions.");
+            }
+        });
     }
 }
 

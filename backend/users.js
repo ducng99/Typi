@@ -1,14 +1,11 @@
+import MySQL from './database'
+
 class UsersHandler
 {
-    constructor()
-    {
-        this.con;
-    }
-
     GetFriends(userID, callback)
     {
         let sql = "SELECT u.UserID, u.Username, r.Status, r.TargetUser FROM `Users` u, `Relationships` r WHERE (r.User1 = ? AND u.UserID = r.User2) OR (r.User2 = ? AND u.UserID = r.User1) ORDER BY u.Username";
-        this.con.query(sql, [userID, userID], function (err, results)
+        MySQL.query(sql, [userID, userID], function (err, results)
         {
             if (err)
             {
@@ -25,7 +22,7 @@ class UsersHandler
     GetUsername(userID, callback)
     {
         let sql = "SELECT Username FROM `Users` WHERE UserID = ?";
-        this.con.query(sql, [userID], function (err, result)
+        MySQL.query(sql, [userID], function (err, result)
         {
             if (err)
             {
@@ -49,7 +46,7 @@ class UsersHandler
     GetUserID(username, callback)
     {
         let sql = "SELECT UserID FROM `Users` WHERE Username = ?";
-        this.con.query(sql, [username], function (err, result)
+        MySQL.query(sql, [username], function (err, result)
         {
             if (err)
             {
@@ -88,7 +85,7 @@ class UsersHandler
                     let user2 = user1 != UserID ? UserID : data.userID;
 
                     let sql = "INSERT INTO `Relationships` (User1, User2, Status, TargetUser) VALUES (?, ?, 'Pending', ?)";
-                    this.con.query(sql, [user1, user2, data.userID], function (err)
+                    MySQL.query(sql, [user1, user2, data.userID], function (err)
                     {
                         if (err)
                         {
@@ -132,15 +129,15 @@ class UsersHandler
             {
                 case "Friends":
                     sql = "UPDATE `Relationships` SET Status = 'Friends' WHERE User1 = ? AND User2 = ? AND TargetUser = ?";
-                    this.con.query(sql, [user1, user2, userID], handle);
+                    MySQL.query(sql, [user1, user2, userID], handle);
                     break;
                 case "Blocked":
                     sql = "UPDATE `Relationships` SET Status = 'Blocked', TargetUser = ? WHERE User1 = ? AND User2 = ?";
-                    this.con.query(sql, [targetID, user1, user2], handle);
+                    MySQL.query(sql, [targetID, user1, user2], handle);
                     break;
                 case "None":
                     sql = "DELETE FROM `Relationships` WHERE User1 = ? AND User2 = ? AND ((Status = 'Blocked' AND TargetUser = ?) OR Status != 'Blocked')";
-                    this.con.query(sql, [user1, user2, targetID], handle);
+                    MySQL.query(sql, [user1, user2, targetID], handle);
                     break;
                 default:
                     callback({status: false});
@@ -174,7 +171,7 @@ class UsersHandler
     GetMessages(userID, targetID, callback)
     {
         let sql = "SELECT * FROM `Messages` WHERE (Sender = ? AND Receiver = ?) OR (Receiver = ? AND Sender = ?) ORDER BY MessageID DESC LIMIT 40";
-        this.con.query(sql, [userID, targetID, userID, targetID], function (err, results)
+        MySQL.query(sql, [userID, targetID, userID, targetID], function (err, results)
         {
             if (err)
             {
@@ -204,7 +201,7 @@ class UsersHandler
             
             let sql = "INSERT INTO `Messages` (Sender, Receiver, Content, KeySender, KeyReceiver, IV, AuthTag, SendTime) SELECT ?, ?, ?, ?, ?, ?, ?, ? WHERE (SELECT Status FROM `Relationships` WHERE User1 = ? AND User2 = ?) = 'Friends'";
             let time = Math.floor(Date.now() / 1000);
-            this.con.query(sql, [senderID, receiverID, encryptedData.message, encryptedData.keySender, encryptedData.keyReceiver, encryptedData.iv, encryptedData.authTag, time, user1, user2], function (err)
+            MySQL.query(sql, [senderID, receiverID, encryptedData.message, encryptedData.keySender, encryptedData.keyReceiver, encryptedData.iv, encryptedData.authTag, time, user1, user2], function (err)
             {
                 if (err)
                 {

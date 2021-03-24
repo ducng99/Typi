@@ -2,6 +2,7 @@ import express from 'express'
 import SessionsHandler from '../sessions'
 import UsersHandler from "../users"
 
+const COOKIE_SESSION_ID = "Typi_Session_ID";
 const router = express.Router();
 
 router.post("/getMessages", function (req, res)
