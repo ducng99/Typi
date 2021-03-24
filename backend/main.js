@@ -2,7 +2,7 @@ import express from "express"
 import cors from "cors"
 import cookieParser from 'cookie-parser'
 
-import SessionsHandler from './sessions'
+import SessionsHandler from './handlers/SessionsHandler'
 
 import UsersRouter from './routers/usersRouter'
 import SessionsRouter from './routers/sessionsRouter'

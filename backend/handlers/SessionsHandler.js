@@ -1,5 +1,5 @@
-import MySQL from './database'
-import { GenerateRandomString } from "./utilities.js"
+import MySQL from './DatabaseHandler'
+import { GenerateRandomString } from "../utilities"
 
 class SessionsHandler
 {

@@ -1,4 +1,4 @@
-import MySQL from './database'
+import MySQL from './DatabaseHandler'
 
 class UsersHandler
 {

@@ -1,5 +1,5 @@
 import express from 'express'
-import SessionsHandler from '../sessions'
+import SessionsHandler from '../handlers/SessionsHandler'
 
 const COOKIE_SESSION_ID = "Typi_Session_ID";
 const router = express.Router();

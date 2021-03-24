@@ -1,7 +1,8 @@
 import mysql from "mysql"
 import fs from "fs"
+import path from "path"
 
-const mysql_creds = JSON.parse(fs.readFileSync("../../mysql-creds.json"));
+const mysql_creds = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "..", "..", "mysql-creds.json")));
 
 var con = mysql.createPool({
     host: "localhost",

@@ -1,7 +1,7 @@
 import express from 'express'
 import crypto from "crypto"
-import MySQL from '../database'
-import SessionsHandler from '../sessions'
+import MySQL from '../handlers/DatabaseHandler'
+import SessionsHandler from '../handlers/SessionsHandler'
 import { CheckCredsValid, GenerateRandomString } from "../utilities"
 
 const router = express.Router();
