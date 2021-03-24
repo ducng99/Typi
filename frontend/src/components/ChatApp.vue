@@ -48,8 +48,6 @@ import Chatbox from "./ChatComponents/Chatbox.vue"
 import OptionsMenu from "./ChatComponents/OptionsMenu.vue"
 import ListFriendsModal from "./ChatComponents/ListFriendsModal.vue"
 
-axios.defaults.withCredentials = true;
-
 var keepAliveInterval, updateFriendsListInterval;
 
 export default {
