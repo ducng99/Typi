@@ -61,11 +61,11 @@
 <script>
 import axios from "axios"
 
+axios.defaults.withCredentials = true;
+
 const RegisterForm = () => import('./components/RegisterForm.vue')
 const LoginForm = () => import('./components/LoginForm.vue')
 const ChatApp = () => import('./components/ChatApp.vue')
-
-axios.defaults.withCredentials = true;
 
 export default {
     name: 'App',
@@ -91,9 +91,10 @@ export default {
                 else
                 {
                     this.$cookies.remove(this.$COOKIE_SESSION_ID);
-                    import('./SecureStorage').then(SecureStorage => {
-                        SecureStorage.default.passwordHash = '';
+                    import('./SecureStorage').then(({default: passwordHash}) => {
+                        passwordHash = '';
                     });
+                    this.loggedIn = false;
                 }
                 
                 this.checkingSession = false;

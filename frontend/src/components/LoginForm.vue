@@ -39,8 +39,8 @@ export default {
             .then(res => {                    
                 if (res.data.status)
                 {
-                    import('../SecureStorage').then(SecureStorage => {
-                        SecureStorage.default.passwordHash = crypto.createHash('sha256').update(this.log_password).digest('hex');
+                    import('../SecureStorage').then(({default: passwordHash}) => {
+                        passwordHash = crypto.createHash('sha256').update(this.log_password).digest('hex');
                     });
                     this.$emit("loginCheck");
                 }

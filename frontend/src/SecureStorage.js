@@ -25,7 +25,7 @@ class SecureStorage {
             const encrypted = localStorage.getItem(key).split('$');
         
             if (encrypted.length === 3)
-                return await CryptoTools.decryptAESWithKey(encrypted[0], passwordHash, encrypted[1], encrypted[2]);
+                return await CryptoTools.decryptAESWithKey(encrypted[0], this.passwordHash, encrypted[1], encrypted[2]);
         }
         
         return false;
