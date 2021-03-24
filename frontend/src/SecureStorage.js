@@ -1,15 +1,13 @@
 import CryptoTools from './crypto-tools'
 
-let passwordHash = '';
-
-export {passwordHash}
-
-export default {    
-    SaveItem(key, value)
+class SecureStorage {
+    static passwordHash = '';
+    
+    static SaveItem(key, value)
     {
         if (key && value)
         {
-            const encrypted = CryptoTools.encryptAESWithKey(value, passwordHash);
+            const encrypted = CryptoTools.encryptAESWithKey(value, this.passwordHash);
             if (encrypted !== false)
             {
                 localStorage.setItem(key, encrypted.message + '$' + encrypted.iv + '$' + encrypted.authTag);
@@ -18,28 +16,30 @@ export default {
         }
         
         return false;
-    },
+    }
     
-    async GetItem(key)
+    static async GetItem(key)
     {
         if (this.HasItem(key))
         {
-            let encrypted = localStorage.getItem(key).split('$');
+            const encrypted = localStorage.getItem(key).split('$');
         
             if (encrypted.length === 3)
                 return await CryptoTools.decryptAESWithKey(encrypted[0], passwordHash, encrypted[1], encrypted[2]);
         }
         
         return false;
-    },
+    }
     
-    HasItem(key)
+    static HasItem(key)
     {
         return localStorage.getItem(key) !== null;
-    },
+    }
     
-    DeleteItem(key)
+    static DeleteItem(key)
     {
         localStorage.removeItem(key);
     }
 }
+
+export default SecureStorage;

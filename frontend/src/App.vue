@@ -61,9 +61,9 @@
 <script>
 import axios from "axios"
 
-import RegisterForm from './components/RegisterForm.vue'
-import LoginForm from './components/LoginForm.vue'
-import ChatApp from './components/ChatApp.vue'
+const RegisterForm = () => import('./components/RegisterForm.vue')
+const LoginForm = () => import('./components/LoginForm.vue')
+const ChatApp = () => import('./components/ChatApp.vue')
 
 axios.defaults.withCredentials = true;
 
@@ -92,7 +92,7 @@ export default {
                 {
                     this.$cookies.remove(this.$COOKIE_SESSION_ID);
                     import('./SecureStorage').then(SecureStorage => {
-                        SecureStorage.passwordHash = '';
+                        SecureStorage.default.passwordHash = '';
                     });
                 }
                 
