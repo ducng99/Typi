@@ -8,6 +8,9 @@ import cookieParser from 'cookie-parser'
 import SessionsHandler from "./sessions"
 import UsersHandler from "./users"
 import { CheckCredsValid, GenerateRandomString } from "./utilities"
+import UsersRouter from './routers/usersRouter'
+import SessionsRouter from './routers/sessionsRouter'
+import ChatRouter from './routers/chatRouter'
 
 var app = express();
 app.use(cors({
@@ -39,6 +42,10 @@ var con = mysql.createPool({
 
 SessionsHandler.con = con;
 UsersHandler.con = con;
+
+app.use("/users", UsersRouter);
+app.use("/sessions", SessionsRouter);
+app.use("/chat", ChatRouter);
 
 app.post("/register", function (req, res)
 {
@@ -149,144 +156,6 @@ app.get("/logout", function (req, res)
             res.send({ status: true });
         }
     })
-});
-
-app.get("/verifySession", function (req, res)
-{
-    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        res.send({ status: data.status });
-    });
-});
-
-app.get("/keepAlive", function (req, res)
-{
-    SessionsHandler.KeepAlive(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        res.send({ status: data.status });
-    });
-});
-
-app.get("/users/get", function (req, res)
-{
-    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        res.send({ status: data.status, user: data.user });
-    });
-});
-
-app.get("/users/getFriends", function (req, res)
-{
-    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        if (data.status)
-        {
-            UsersHandler.GetFriends(data.user.UserID, data2 =>
-            {
-                if (data2.status)
-                {
-                    res.send({ status: true, friends: data2.friends });
-                }
-                else
-                {
-                    res.send({ status: false });
-                }
-            });
-        }
-        else
-        {
-            res.send({ status: false });
-        }
-    });
-});
-
-app.post("/users/addFriend", function (req, res)
-{
-    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        if (data.status)
-        {
-            UsersHandler.AddFriend(data.user.UserID, req.body.targetUsername, data2 =>
-            {
-                res.send({ status: data2.status, msg: data2.msg });
-            });
-        }
-        else
-        {
-            res.send({ status: false, msg: "Unable to verify your session." });
-        }
-    });
-});
-
-app.post("/users/updateRelationship", function (req, res)
-{
-    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        if (data.status)
-        {
-            UsersHandler.GetUserID(req.body.targetUsername, data2 =>
-            {
-                if (data2.status)
-                {
-                    UsersHandler.UpdateRelationship(data.user.UserID, data2.userID, req.body.relationship, data3 =>
-                    {
-                        res.send({ status: data3.status });
-                    });
-                }
-                else
-                {
-                    res.send({ status: false });
-                }
-            });
-        }
-        else
-        {
-            res.send({ status: false });
-        }
-    })
-});
-
-app.post("/users/getMessages", function (req, res)
-{
-    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        if (data.status)
-        {
-            UsersHandler.GetMessages(data.user.UserID, req.body.receiverID, data2 =>
-            {
-                if (data2.status)
-                {
-                    res.send({ status: true, messages: data2.messages });
-                }
-                else
-                {
-                    res.send({ status: false });
-                }
-            });
-        }
-        else
-        {
-            res.send({ status: false });
-        }
-    });
-});
-
-app.post("/users/sendMessage", function (req, res)
-{
-    SessionsHandler.GetSession(req.cookies[COOKIE_SESSION_ID], data =>
-    {
-        if (data.status)
-        {
-            UsersHandler.SendMessage(data.user.UserID, req.body.receiverID, req.body.encryptedMsg, data2 =>
-            {
-                res.send({ status: data2.status });
-            });
-        }
-        else
-        {
-            res.send({ status: false });
-        }
-    });
 });
 
 setInterval(function ()
