@@ -80,7 +80,8 @@ export default {
         }
     },
     methods: {
-        CheckSession() {            
+        CheckSession() {
+            this.checkingSession = true;
             axios.get("https://chat-backend.ducng.dev/verifySession")
             .then(res => {
                 if (res.data.status)
@@ -92,6 +93,8 @@ export default {
                     this.$cookies.remove(this.$COOKIE_SESSION_ID);
                     this.$passwordHashed = '';
                 }
+                
+                this.checkingSession = false;
             });
         }
     },
