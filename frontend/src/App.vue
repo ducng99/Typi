@@ -82,7 +82,7 @@ export default {
     methods: {
         CheckSession() {
             this.checkingSession = true;
-            axios.get("https://chat-backend.ducng.dev/verifySession")
+            axios.get("https://chat-backend.ducng.dev/sessions/verifySession")
             .then(res => {
                 if (res.data.status)
                 {

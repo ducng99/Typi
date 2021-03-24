@@ -109,7 +109,7 @@ export default {
             }, 60000);
         },
         sendKeepAlive() {
-            axios.get("https://chat-backend.ducng.dev/keepAlive")
+            axios.get("https://chat-backend.ducng.dev/sessions/keepAlive")
             .then(res => {
                 if (!res.data.status)
                 {
@@ -125,17 +125,17 @@ export default {
         }
     },
     created() {
-        axios.post("https://chat-backend.ducng.dev/users/get")
-            .then(res => {
-                if (res.data.status)
-                {
-                    this.currentUser = res.data.user;
-                }
-                else
-                {
-                    this.$emit("loginCheck");
-                }
-            });
+        axios.get("https://chat-backend.ducng.dev/users/get")
+        .then(res => {
+            if (res.data.status)
+            {
+                this.currentUser = res.data.user;
+            }
+            else
+            {
+                this.$emit("loginCheck");
+            }
+        });
         
         this.updateFriendsList();
         updateFriendsListInterval = setInterval(() => {

@@ -85,7 +85,7 @@ export default {
                 
                 if (encryptedMsg)
                 {
-                    axios.post("https://chat-backend.ducng.dev/users/sendMessage", {
+                    axios.post("https://chat-backend.ducng.dev/chat/sendMessage", {
                         receiverID: this.receiver.UserID,
                         encryptedMsg: encryptedMsg
                     }).then(res => {
@@ -115,7 +115,7 @@ export default {
             
             if (pReceiver.UserID)
             {
-                axios.post("https://chat-backend.ducng.dev/users/getMessages", {receiverID: pReceiver.UserID})
+                axios.post("https://chat-backend.ducng.dev/chat/getMessages", {receiverID: pReceiver.UserID})
                 .then(res => {
                     if (queue == getMessagesQueue)
                     {                        

@@ -3,11 +3,14 @@ import CryptoTools from './crypto-tools'
 export default {
     SaveItem(key, value)
     {
-        const encrypted = CryptoTools.encryptAESWithKey(value, this.$passwordHashed);
-        if (encrypted !== false)
+        if (key && value)
         {
-            localStorage.setItem(key, encrypted.message + '$' + encrypted.iv + '$' + encrypted.authTag);
-            return true;
+            const encrypted = CryptoTools.encryptAESWithKey(value, this.$passwordHashed);
+            if (encrypted !== false)
+            {
+                localStorage.setItem(key, encrypted.message + '$' + encrypted.iv + '$' + encrypted.authTag);
+                return true;
+            }
         }
         
         return false;
