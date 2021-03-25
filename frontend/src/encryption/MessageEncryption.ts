@@ -8,7 +8,7 @@ export default {
      * @param {String} ReceiverPublicKey receiver public key in hex
      * @returns {Buffer} a buffer containing the shared secret key
      */
-    GetSharedSecret(DHKeypair, ReceiverPublicKey)
+    GetSharedSecret(DHKeypair: DiffieHellman, ReceiverPublicKey: string): Buffer
     {
         return DHKeypair.computeSecret(ReceiverPublicKey, 'hex');
     }

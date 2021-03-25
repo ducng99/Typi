@@ -20,9 +20,9 @@ export default {
      * Generate a new Diffie-Hellman key pair
      * @returns {Promise<DiffieHellman>} a new DiffieHellman object
      */
-    async GenerateDHKeys()
+    async GenerateDHKeys(): Promise<DiffieHellman>
     {
-        let keys = crypto.createDiffieHellman(512);
+        const keys = crypto.createDiffieHellman(512);
         keys.generateKeys();
         
         return keys;
@@ -30,17 +30,17 @@ export default {
     
     /**
      * Encrypt given message with a given key
-     * @param {String} message The message to be encrypted
-     * @param {String} key a passphrase in hex represents 32 bytes key
-     * @returns {Promise<{message : String, iv : String, authTag: String}|false>} the encrypted message, IV and AuthTag in hex
+     * @param {string} message The message to be encrypted
+     * @param {string} key a passphrase in hex represents 32 bytes key
+     * @returns {Promise<{message : string, iv : string, authTag: string}|false>} the encrypted message, IV and AuthTag in hex
      */
-    async EncryptAESWithKey(message, key)
+    async EncryptAESWithKey(message: string, key: string): Promise<{ message: string; iv: string; authTag: string; } | false>
     {
         try
         {
-            let iv = crypto.randomBytes(ivLength);
-            let keyBytes = Buffer.from(key, "hex");
-            let cipher = crypto.createCipheriv(algorithm, keyBytes, iv);
+            const iv = crypto.randomBytes(ivLength);
+            const keyBytes = Buffer.from(key, "hex");
+            const cipher = crypto.createCipheriv(algorithm, keyBytes, iv);
             let ciphered = cipher.update(message, inputEncoding, outputEncoding);
             ciphered += cipher.final(outputEncoding);
 
@@ -54,19 +54,19 @@ export default {
     
     /**
      * Decrypt given message with a given key
-     * @param {String} message The encrypted message
-     * @param {String} key a passphrase in hex represents 32 bytes key
-     * @param {String} iv an IV given by the cipher
-     * @param {String} authTag an AuthTag given by the cipher
-     * @returns {Promise<String|false>} the decrypted message
+     * @param {string} message The encrypted message
+     * @param {string} key a passphrase in hex represents 32 bytes key
+     * @param {string} iv an IV given by the cipher
+     * @param {string} authTag an AuthTag given by the cipher
+     * @returns {Promise<string|false>} the decrypted message
      */
-    async DecryptAESWithKey(message, key, iv, authTag)
+    async DecryptAESWithKey(message: string, key: string, iv: string, authTag: string): Promise<string | false>
     {
         try
         {
-            let iv_buf = Buffer.from(iv, outputEncoding);
-            let keyBytes = Buffer.from(key, "hex");
-            let decipher = crypto.createDecipheriv(algorithm, keyBytes, iv_buf);
+            const iv_buf = Buffer.from(iv, outputEncoding);
+            const keyBytes = Buffer.from(key, "hex");
+            const decipher = crypto.createDecipheriv(algorithm, keyBytes, iv_buf);
             decipher.setAuthTag(Buffer.from(authTag, outputEncoding));
             let deciphered = decipher.update(message, outputEncoding, inputEncoding);
             deciphered += decipher.final(inputEncoding);
@@ -79,7 +79,7 @@ export default {
         }
     },
     
-    async hashPassword(password, salt)
+    async hashPassword(password : string, salt?: string)
     {
         try
         {
@@ -88,7 +88,7 @@ export default {
                 salt = crypto.randomBytes(16).toString('hex');
             }
             
-            let hashed = await argon2.hash({
+            const hashed = await argon2.hash({
                 pass: password,
                 salt: salt
             });

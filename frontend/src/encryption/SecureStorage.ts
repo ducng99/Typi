@@ -3,7 +3,7 @@ import CryptoTools from './CryptoTools'
 class SecureStorage {
     static passwordHash = '';
     
-    static async SaveItem(key, value)
+    static async SaveItem(key : string, value : string)
     {
         if (key && value && this.passwordHash)
         {
@@ -18,25 +18,25 @@ class SecureStorage {
         return false;
     }
     
-    static async GetItem(key)
+    static async GetItem(key : string)
     {
         if (this.HasItem(key) && this.passwordHash)
         {
-            const encrypted = localStorage.getItem(key).split('$');
+            const encrypted = localStorage.getItem(key)?.split('$');
         
-            if (encrypted.length === 3)
+            if (encrypted && encrypted.length === 3)
                 return await CryptoTools.DecryptAESWithKey(encrypted[0], this.passwordHash, encrypted[1], encrypted[2]);
         }
         
         return false;
     }
     
-    static HasItem(key)
+    static HasItem(key : string)
     {
         return localStorage.getItem(key) !== null;
     }
     
-    static DeleteItem(key)
+    static DeleteItem(key : string)
     {
         localStorage.removeItem(key);
     }

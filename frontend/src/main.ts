@@ -1,13 +1,13 @@
 import Vue from 'vue'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import VueCookies from 'vue-cookies'
-import IdleVue from "idle-vue"
-import CryptoTools from "./crypto-tools"
+import IdleVue from 'idle-vue'
+import CryptoTools from './encryption/CryptoTools'
 import App from './App.vue'
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
-import styles from './style.module.css'
+require('bootstrap/dist/css/bootstrap.css')
+require('bootstrap-vue/dist/bootstrap-vue.css')
+const styles = require('./style.module.css')
 
 Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
@@ -19,7 +19,7 @@ Vue.prototype.$STORAGE_KEYS = "Typi_Keys";
 Vue.prototype.$crypto = CryptoTools;
 Vue.prototype.$style = styles;
 
-var app = new Vue({
+const app = new Vue({
   render: h => h(App),
 }).$mount('#app');
 
