@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import CryptoTools from '../../src/encryption/CryptoTools'
-import { createHash } from 'crypto'
+import { createHash, createDiffieHellman } from 'crypto'
 
 const secretKey = createHash("sha256").update("some secret stuff").digest('hex');
 const wrongSecretKey = createHash("sha256").update("something else").digest('hex');
@@ -37,6 +37,25 @@ describe('CryptoTools.ts', () => {
                     done();
                 })
             }
+        })
+    })
+    
+    it('Get shared secret', (done) => {
+        CryptoTools.GenerateDHKeys().then(aliceKeys => {
+            expect(aliceKeys.getPrivateKey()).to.not.be.empty;
+            expect(aliceKeys.getPublicKey()).to.not.be.empty;
+            
+            CryptoTools.GenerateDHKeys().then(bobKeys => {
+                expect(bobKeys.getPrivateKey()).to.not.be.empty;
+                expect(bobKeys.getPublicKey()).to.not.be.empty;
+                
+                const aliceSharedSecret = CryptoTools.GetSharedSecret(aliceKeys, bobKeys.getPublicKey().toString('hex'));
+                const bobSharedSecret = CryptoTools.GetSharedSecret(bobKeys, aliceKeys.getPublicKey().toString('hex'));
+                
+                expect(aliceSharedSecret.toString('hex')).to.equal(bobSharedSecret.toString('hex'));
+                
+                done();
+            })
         })
     })
 })
