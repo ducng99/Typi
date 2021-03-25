@@ -9,7 +9,7 @@ export default class User
         this.UserID = 0;
     }
     
-    static Init(dbUser: {UserID: number, Username: string})
+    static Init(dbUser: {UserID: number, Username: string}): User
     {
         const newUser = new User();
         

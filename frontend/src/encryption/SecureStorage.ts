@@ -3,7 +3,7 @@ import CryptoTools from './CryptoTools'
 class SecureStorage {
     static passwordHash = '';
     
-    static async SaveItem(key : string, value : string)
+    static async SaveItem(key : string, value : string): Promise<boolean>
     {
         if (key && value && this.passwordHash)
         {
@@ -18,7 +18,7 @@ class SecureStorage {
         return false;
     }
     
-    static async GetItem(key : string)
+    static async GetItem(key : string): Promise<string | false>
     {
         if (this.HasItem(key) && this.passwordHash)
         {
@@ -31,12 +31,12 @@ class SecureStorage {
         return false;
     }
     
-    static HasItem(key : string)
+    static HasItem(key : string): boolean
     {
         return localStorage.getItem(key) !== null;
     }
     
-    static DeleteItem(key : string)
+    static DeleteItem(key : string): void
     {
         localStorage.removeItem(key);
     }

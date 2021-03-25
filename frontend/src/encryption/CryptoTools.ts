@@ -12,7 +12,6 @@ import argon2 from "argon2-browser"
 const algorithm = 'aes-256-gcm';
 const inputEncoding = 'utf8';
 const ivLength = 12;
-const keyLength = 32;
 const outputEncoding = 'hex';
 
 export default {
@@ -79,7 +78,7 @@ export default {
         }
     },
     
-    async hashPassword(password : string, salt?: string)
+    async hashPassword(password : string, salt?: string): Promise<false | { password: string; salt: string; }>
     {
         try
         {
