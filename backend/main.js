@@ -8,10 +8,11 @@ import UsersRouter from './routers/usersRouter'
 import SessionsRouter from './routers/sessionsRouter'
 import ChatRouter from './routers/chatRouter'
 import CredsRouter from './routers/credsRouter'
+import PublicKeysRouter from './routers/keysRouter'
 
 var app = express();
 app.use(cors({
-    origin: ["https://ducng.dev", "https://ducng.dev:2053", /\.ducng\.dev$/],
+    origin: ["https://localhost:2053", "https://ducng.dev:2053", /\.ducng\.dev$/],
     credentials: true
 }));
 app.use(express.json());
@@ -27,16 +28,17 @@ app.use("/users", UsersRouter);
 app.use("/sessions", SessionsRouter);
 app.use("/chat", ChatRouter);
 app.use("/creds", CredsRouter);
+app.use("/publickeys", PublicKeysRouter);
 
-setInterval(function ()
+setInterval(() =>
 {
     SessionsHandler.ClearOldSessions();
-}, 60000 * 10);
+}, 60000);
 
 // ERROR HANDLING - START
 //----------------------------------------------------------------------------------//
 // Handle 404
-app.use(function (req, res)
+app.use((req, res) =>
 {
     res.status(404).send({ error: 404, msg: 'Page not Found' });
 });
