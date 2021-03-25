@@ -80,12 +80,10 @@ class SessionsHandler
             {
                 console.error(err);
             }
-            else
-            {
-                console.info("Cleared sessions.");
-            }
         });
     }
 }
 
-export default new SessionsHandler();
+const instance = new SessionsHandler();
+
+export default instance;

@@ -221,4 +221,6 @@ class UsersHandler
     }
 }
 
-export default new UsersHandler();
+const instance = new UsersHandler();
+
+export default instance;
