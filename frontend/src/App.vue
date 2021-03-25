@@ -91,7 +91,7 @@ export default {
                 else
                 {
                     this.$cookies.remove(this.$COOKIE_SESSION_ID);
-                    import('./SecureStorage').then(({default: passwordHash}) => {
+                    import('./encryption/SecureStorage').then(({default: passwordHash}) => {
                         passwordHash = '';
                     });
                     this.loggedIn = false;

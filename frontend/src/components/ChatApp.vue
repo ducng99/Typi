@@ -43,7 +43,6 @@
 <script>
 import axios from "axios"
 import User from '../models/User'
-import SecureStorage from '../SecureStorage'
 
 var keepAliveInterval, updateFriendsListInterval;
 
@@ -112,15 +111,10 @@ export default {
                 if (!res.data.status)
                 {
                     console.error("Cannot send keep-alive request.");
+                    this.$emit("loginCheck");
                 }
             });
         },
-        syncPublicKeys() {
-            if (!SecureStorage.HasItem(this.$STORAGE_KEYS))
-            {
-                
-            }
-        }
     },
     created() {
         axios.get("https://chat-backend.ducng.dev/users/get")
