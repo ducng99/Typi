@@ -7,7 +7,7 @@
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="mr-auto">
-                        Hi <b>{{ currentUser.Username }}</b>.
+                        Hi <b>{{ currentUser?.Username }}</b>.
                     </div>
                     <div @click="$bvModal.show('addFriendModal')" :class="$style.button_icon">
                         <b-icon icon="person-plus-fill"></b-icon>
@@ -47,6 +47,7 @@ import Constants from '@/constants'
 import User from '@/models/User'
 import MessageEncryption from '@/encryption/MessageEncryption'
 import PrivateKey from '@/models/PrivateKey'
+import Relationship from '@/models/Relationship'
 
 import AddFriendModal from "@/components/ChatComponents/AddFriendModal.vue"
 import Chatbox from "@/components/ChatComponents/Chatbox.vue"
@@ -80,16 +81,22 @@ export default class ChatApp extends Vue {
         .then(res => {
             if (res.data.status)
             {
-                this.acceptedFriends = res.data.friends.filter((entry: any) => {
+                this.acceptedFriends = res.data.friends.filter((entry: Relationship) => {
                     return entry.Status === "Friends";
+                }).map((entry: Relationship) => {
+                    return User.Init({UserID: entry.UserID, Username: entry.Username});
                 });
                 
-                this.blockedFriends = res.data.friends.filter((entry: any) => {
+                this.blockedFriends = res.data.friends.filter((entry: Relationship) => {
                     return (entry.Status === "Blocked" && entry.TargetUser !== this.currentUser?.UserID);
+                }).map((entry: Relationship) => {
+                    return User.Init({UserID: entry.UserID, Username: entry.Username});
                 });
                 
-                this.pendingFriends = res.data.friends.filter((entry: any) => {
+                this.pendingFriends = res.data.friends.filter((entry: Relationship) => {
                     return (entry.Status === "Pending" && entry.TargetUser === this.currentUser?.UserID);
+                }).map((entry: Relationship) => {
+                    return User.Init({UserID: entry.UserID, Username: entry.Username});
                 });
             }
         });
