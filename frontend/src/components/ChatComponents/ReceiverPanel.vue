@@ -17,22 +17,16 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from "axios"
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import User from '../../models/User'
 
-export default {
-    name: "ReceiverPanel",
-    props: {
-        receiver: Object
-    },
-    data() {
-        return {
-            
-        }
-    },
-    methods: {
-        
-    }
+@Component({
+    name: "ReceiverPanel"
+})
+export default class ReceiverPanel extends Vue {
+    @Prop({required: true, default: null}) receiver!: User
 }
 </script>
 

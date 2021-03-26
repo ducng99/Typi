@@ -1,6 +1,6 @@
 {
   "name": "typi-frontend",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": false,
   "description": "Typi's frontend app. Made with Vue.js",
   "license": "AGPL-3.0",

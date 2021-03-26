@@ -10,39 +10,35 @@
     </b-modal>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import axios from "axios"
+import Constants from '../../constants'
 
-export default {
-    name: 'AddFriendModal',
-    props: {
+@Component({
+    name: 'AddFriendModal'
+})
+export default class AddFriendModal extends Vue {
+    private showAlert = false;
+    private alertMsg = "";
+    private alertType = "success";
+    private addFriend_username = "";
         
-    },
-    data() {
-        return {
-            showAlert: false,
-            alertMsg: "",
-            alertType: "success",
-            addFriend_username: ""
-        }
-    },
-    methods: {
-        onAddFriend(event) {
-            axios.post("https://chat-backend.ducng.dev/users/addFriend", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID), targetUsername: this.addFriend_username})
-                .then(res => {
-                    if (res.data.status)
-                    {
-                        this.alertType = "success";
-                    }
-                    else
-                    {
-                        this.alertType = "danger";
-                    }
-                    
-                    this.alertMsg = res.data.msg;
-                    this.showAlert = true;
-                });
-        }
+    onAddFriend() : void {
+        axios.post(Constants.BACKEND_SERVER_ADDR + "/users/addFriend", {targetUsername: this.addFriend_username})
+            .then(res => {
+                if (res.data.status)
+                {
+                    this.alertType = "success";
+                }
+                else
+                {
+                    this.alertType = "danger";
+                }
+                
+                this.alertMsg = res.data.msg;
+                this.showAlert = true;
+            });
     }
 }
 </script>

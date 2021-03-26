@@ -31,7 +31,7 @@
                 </div>
             </b-col>
             <b-col class="p-0 bg-white">
-                <Chatbox ref="chatbox" :currentUser="currentUser"/>
+                <Chatbox ref="chatbox" :currentUser="currentUser" :listKeys="listKeys"/>
             </b-col>
         </b-row>
         
@@ -40,110 +40,132 @@
     </b-container>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
 import axios from "axios"
-import User from '../models/User'
+import Constants from '@/constants'
+import User from '@/models/User'
+import MessageEncryption from '@/encryption/MessageEncryption'
 
-var keepAliveInterval, updateFriendsListInterval;
+import AddFriendModal from "@/components/ChatComponents/AddFriendModal.vue"
+import Chatbox from "@/components/ChatComponents/Chatbox.vue"
+import OptionsMenu from "@/components/ChatComponents/OptionsMenu.vue"
+import ListFriendsModal from "@/components/ChatComponents/ListFriendsModal.vue"
+import PrivateKey from '@/models/PrivateKey';
 
-export default {
+let keepAliveInterval: number, updateFriendsListInterval: number;
+
+@Component({
     name: 'ChatApp',
     components: {
-        AddFriendModal: () => import("./ChatComponents/AddFriendModal.vue"),
-        Chatbox: () => import("./ChatComponents/Chatbox.vue"),
-        OptionsMenu: () => import("./ChatComponents/OptionsMenu.vue"),
-        ListFriendsModal: () => import("./ChatComponents/ListFriendsModal.vue")
-    },
-    data() {
-        return {
-            currentUser: User,
-            acceptedFriends: [],
-            blockedFriends: [],
-            pendingFriends: [],
-            showMenu: false
-        }
-    },
-    methods: {
-        updateFriendsList() {
-            axios.get("https://chat-backend.ducng.dev/users/getFriends")
-                .then(res => {
-                    if (res.data.status)
-                    {
-                        this.acceptedFriends = res.data.friends.filter(entry => {
-                            return entry.Status === "Friends";
-                        });
-                        
-                        this.blockedFriends = res.data.friends.filter(entry => {
-                            return (entry.Status === "Blocked" && entry.TargetUser !== this.currentUser.UserID);
-                        });
-                        
-                        this.pendingFriends = res.data.friends.filter(entry => {
-                            return (entry.Status === "Pending" && entry.TargetUser === this.currentUser.UserID);
-                        });
-                    }
+        AddFriendModal, Chatbox, OptionsMenu, ListFriendsModal
+    }
+})
+export default class ChatApp extends Vue {
+    currentUser: User|null = null;
+    acceptedFriends: User[] = [];
+    blockedFriends: User[] = [];
+    pendingFriends: User[] = [];
+    showMenu = false;
+    listKeys: Record<string, PrivateKey> = {}
+    
+    $refs!: Vue["$refs"] & {
+        chatbox: InstanceType<typeof Chatbox>,
+        listFriendsModal: InstanceType<typeof ListFriendsModal>
+    }
+    
+    private updateFriendsList() : void
+    {
+        axios.get(Constants.BACKEND_SERVER_ADDR + "/users/getFriends")
+        .then(res => {
+            if (res.data.status)
+            {
+                this.acceptedFriends = res.data.friends.filter((entry: any) => {
+                    return entry.Status === "Friends";
                 });
-        },
-        onChatPick(receiver) {
-            this.$refs.chatbox.updateReceiver(receiver);
-        },
-        showListFriendsModal(type) {
-            switch (type) {
-                case "Blocked":
-                    this.$refs.listFriendsModal.create(this.blockedFriends, type);
-                    break;
-                case "Pending":
-                    this.$refs.listFriendsModal.create(this.pendingFriends, type);
-                    break;
-                default:
-                    break;
+                
+                this.blockedFriends = res.data.friends.filter((entry: any) => {
+                    return (entry.Status === "Blocked" && entry.TargetUser !== this.currentUser?.UserID);
+                });
+                
+                this.pendingFriends = res.data.friends.filter((entry: any) => {
+                    return (entry.Status === "Pending" && entry.TargetUser === this.currentUser?.UserID);
+                });
             }
-        },
-        keepAlive() {
+        });
+    }
+    
+    public onChatPick(receiver : any) : void {
+        this.$refs.chatbox.updateReceiver(receiver);
+    }
+    
+    showListFriendsModal(type: string) : void
+    {
+        switch (type) {
+            case "Blocked":
+                this.$refs.listFriendsModal.create(this.blockedFriends, type);
+                break;
+            case "Pending":
+                this.$refs.listFriendsModal.create(this.pendingFriends, type);
+                break;
+            default:
+                break;
+        }
+    }
+    
+    keepAlive() : void {
+        this.sendKeepAlive();
+        clearInterval(keepAliveInterval);
+        
+        keepAliveInterval = setInterval(() => {
             this.sendKeepAlive();
-            clearInterval(keepAliveInterval);
-            keepAliveInterval = setInterval(() => {
-                this.sendKeepAlive();
-            }, 60000);
-        },
-        sendKeepAlive() {
-            axios.get("https://chat-backend.ducng.dev/sessions/keepAlive")
-            .then(res => {
-                if (!res.data.status)
-                {
-                    console.error("Cannot send keep-alive request.");
-                    this.$emit("loginCheck");
-                }
-            });
-        },
-    },
-    created() {
-        axios.get("https://chat-backend.ducng.dev/users/get")
+        }, 60000);
+    }
+    
+    sendKeepAlive() : void {
+        axios.get(Constants.BACKEND_SERVER_ADDR + "/sessions/keepAlive")
+        .then(res => {
+            if (!res.data.status)
+            {
+                console.error("Cannot send keep-alive request.");
+                this.$emit("loginCheck");
+            }
+        });
+    }
+    
+    created() : void {
+        axios.get(Constants.BACKEND_SERVER_ADDR + "/users/get")
         .then(res => {
             if (res.data.status)
             {
                 this.currentUser = User.Init(res.data.user);
+        
+                this.updateFriendsList();
+                updateFriendsListInterval = setInterval(() => {
+                    this.updateFriendsList();
+                }, 1000);
+                
+                this.keepAlive();
+                
+                MessageEncryption.UpdateStorageKeys(this.currentUser.UserID, this.listKeys);
             }
             else
             {
                 this.$emit("loginCheck");
             }
         });
-        
-        this.updateFriendsList();
-        updateFriendsListInterval = setInterval(() => {
-            this.updateFriendsList();
-        }, 1000);
-        
-        this.keepAlive();
-    },
-    destroyed() {
+    }
+    
+    destroyed() : void {
         clearInterval(updateFriendsListInterval);
         clearInterval(keepAliveInterval);
-    },
-    onIdle() {
+    }
+    
+    onIdle() : void {
         clearInterval(keepAliveInterval);
-    },
-    onActive() {
+    }
+    
+    onActive() : void {
         this.keepAlive();
     }
 }

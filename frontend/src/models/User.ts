@@ -1,7 +1,7 @@
 export default class User
 {
-    Username: string;
-    UserID: number;
+    Username = '';
+    UserID = 0;
     
     constructor()
     {

@@ -19,46 +19,44 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
 import axios from "axios"
+import Constants from '@/constants'
+import crypto from 'crypto'
+import SecureStorage from '@/encryption/SecureStorage';
 
-export default {
-    name: 'RegisterForm',
-    props: {
+@Component({
+    name: 'RegisterForm'
+})
+export default class RegisterForm extends Vue {
+    private reg_username = '';
+    private reg_password = '';
+    private reg_alert = '';
+    private reg_showAlert = false;
+    private reg_alertType = 'success';
+    
+    onSubmit(event: Event) : void {
+        event.preventDefault();
         
-    },
-    data() {
-        return {
-            reg_username: '',
-            reg_password: '',
-            reg_alert: '',
-            reg_showAlert: false,
-            reg_alertType: 'success'
-        }
-    },
-    methods: {
-        onSubmit(event) {
-            event.preventDefault();
+        axios.post(Constants.BACKEND_SERVER_ADDR + "/creds/register", {username: this.reg_username, password: this.reg_password, sender: location.hostname})
+        .then(res => {                    
+            if (res.data.status)
+            {
+                this.reg_alertType = "success";
+                import('@/encryption/SecureStorage').then(SecureStorage => {
+                    SecureStorage.default.passwordHash = crypto.createHash('sha256').update(this.reg_password).digest('hex');
+                });
+                this.$emit("loginCheck");
+            }
+            else
+            {
+                this.reg_alertType = "danger";
+            }
             
-            axios.post("https://chat-backend.ducng.dev/creds/register", {username: this.reg_username, password: this.reg_password, sender: location.hostname})
-            .then(res => {                    
-                if (res.data.status)
-                {
-                    this.reg_alertType = "success";
-                    import('../encryption/SecureStorage').then(({default: passwordHash}) => {
-                        passwordHash = crypto.createHash('sha256').update(this.reg_password).digest('hex');
-                    });
-                    this.$emit("loginCheck");
-                }
-                else
-                {
-                    this.reg_alertType = "danger";
-                }
-                
-                this.reg_alert = res.data.msg;
-                this.reg_showAlert = true;
-            });
-        }
+            this.reg_alert = res.data.msg;
+            this.reg_showAlert = true;
+        });
     }
 }
 </script>

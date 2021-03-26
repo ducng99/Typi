@@ -58,8 +58,10 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import axios from "axios"
+import Constants from './constants'
 
 axios.defaults.withCredentials = true;
 
@@ -67,44 +69,43 @@ const RegisterForm = () => import('./components/RegisterForm.vue')
 const LoginForm = () => import('./components/LoginForm.vue')
 const ChatApp = () => import('./components/ChatApp.vue')
 
-export default {
+@Component({
     name: 'App',
     components: {
         RegisterForm, LoginForm, ChatApp
-    },
-    data() {
-        return {
-            showRegisterOrLogin: false,  // false = login, true = register
-            loggedIn: false,
-            checkingSession: false
-        }
-    },
-    methods: {
-        CheckSession() {
-            this.checkingSession = true;
-            axios.get("https://chat-backend.ducng.dev/sessions/verifySession")
-            .then(res => {
-                if (res.data.status)
-                {
-                    this.loggedIn = true;
-                }
-                else
-                {
-                    this.$cookies.remove(this.$COOKIE_SESSION_ID);
-                    import('./encryption/SecureStorage').then(({default: passwordHash}) => {
-                        passwordHash = '';
-                    });
-                    this.loggedIn = false;
-                }
-                
-                this.checkingSession = false;
-            });
-        }
-    },
-    created() {
+    }
+})
+export default class App extends Vue {
+    showRegisterOrLogin = false;  // false = login, true = register
+    loggedIn = false;
+    checkingSession = false;
+    
+    public CheckSession() : void {
+        this.checkingSession = true;
+        axios.get(Constants.BACKEND_SERVER_ADDR + "/sessions/verifySession")
+        .then(res => {
+            if (res.data.status)
+            {
+                this.loggedIn = true;
+            }
+            else
+            {
+                this.$cookies.remove(Constants.COOKIE_SESSION_ID);
+                import('@/encryption/SecureStorage').then(SecureStorage => {
+                    SecureStorage.default.passwordHash = '';
+                });
+                this.loggedIn = false;
+            }
+            
+            this.checkingSession = false;
+        });
+    }
+
+    created() : void {
         this.CheckSession();
-    },
-    mounted() {
+    }
+    
+    mounted() : void {
         
     }
 }

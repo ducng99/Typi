@@ -5,3 +5,4 @@ declare module '*.vue' {
 
 declare module 'argon2-browser';
 declare module 'idle-vue';
+declare module 'vue-clickaway';
