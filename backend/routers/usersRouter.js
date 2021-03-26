@@ -62,19 +62,9 @@ router.post("/updateRelationship", function (req, res)
     {
         if (data.status)
         {
-            UsersHandler.GetUserID(req.body.targetUsername, data2 =>
+            UsersHandler.UpdateRelationship(data.user.UserID, req.body.targetUserID, req.body.relationship, data2 =>
             {
-                if (data2.status)
-                {
-                    UsersHandler.UpdateRelationship(data.user.UserID, data2.userID, req.body.relationship, data3 =>
-                    {
-                        res.send({ status: data3.status });
-                    });
-                }
-                else
-                {
-                    res.send({ status: false });
-                }
+                res.send({ status: data2.status });
             });
         }
         else
