@@ -16,39 +16,38 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator';
 import axios from "axios"
 import crypto from 'crypto'
+import Constants from '../constants'
 import SecureStorage from '../encryption/SecureStorage'
 
-export default {
-    name: 'LoginForm',
-    data() {
-        return {
-            log_username: '',
-            log_password: '',
-            log_alert: '',
-            log_showAlert: false
-        }
-    },
-    methods: {
-        onSubmit(event) {
-            event.preventDefault();
+@Component({
+    name: 'LoginForm'
+})
+export default class LoginForm extends Vue {
+    private log_username = '';
+    private log_password = '';
+    private log_alert = '';
+    private log_showAlert = false;
             
-            axios.post("https://chat-backend.ducng.dev/creds/login", {username: this.log_username, password: this.log_password, sender: location.hostname })
-            .then(res => {                    
-                if (res.data.status)
-                {
-                    import('../encryption/SecureStorage').then(({default: passwordHash}) => {
-                        passwordHash = crypto.createHash('sha256').update(this.log_password).digest('hex');
-                    });
-                    this.$emit("loginCheck");
-                }
-                
-                this.log_showAlert = true;
-                this.log_alert = res.data.msg;
-            });
-        }
+    onSubmit(event: Event) : void {
+        event.preventDefault();
+        
+        axios.post(Constants.BACKEND_SERVER_ADDR + "/creds/login", {username: this.log_username, password: this.log_password, sender: location.hostname })
+        .then(res => {                    
+            if (res.data.status)
+            {
+                import('@/encryption/SecureStorage').then(SecureStorage => {
+                    SecureStorage.default.passwordHash = crypto.createHash('sha256').update(this.log_password).digest('hex');
+                });
+                this.$emit("loginCheck");
+            }
+            
+            this.log_showAlert = true;
+            this.log_alert = res.data.msg;
+        });
     }
 }
 </script>

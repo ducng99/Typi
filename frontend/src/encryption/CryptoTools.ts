@@ -21,11 +21,22 @@ export default {
      */
     async GenerateDHKeys(): Promise<DiffieHellman>
     {
-        const keys = crypto.createDiffieHellman(512);
+        const keys = crypto.getDiffieHellman('modp14'); // 2048-bit prime
         keys.generateKeys();
         
         return keys;
     },
+    
+    /**
+     * Get shared secret from our key pair and receiver's public key
+     * @param {DiffieHellman} DHKeypair DiffieHellman object containing private key
+     * @param {String} ReceiverPublicKey receiver public key in hex
+     * @returns {Buffer} a buffer containing the shared secret key
+     */
+     GetSharedSecret(DHKeypair: DiffieHellman, ReceiverPublicKey: string): Buffer
+     {
+         return DHKeypair.computeSecret(ReceiverPublicKey, 'hex');
+     },
     
     /**
      * Encrypt given message with a given key

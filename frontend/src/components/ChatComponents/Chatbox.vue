@@ -46,167 +46,171 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import axios from "axios"
+import Constants from '../../constants'
+import User from '../../models/User'
 import ReceiverPanel from "./ReceiverPanel.vue"
 
-var interval_refreshMsgs, interval_decryptMsgs;
-var getMessagesQueue = 0;
-var updatedReceiver = false;
+let interval_refreshMsgs: number, interval_decryptMsgs: number;
+let getMessagesQueue = 0;
+let updatedReceiver = false;
 
-export default {
+@Component({
     name: 'Chatbox',
     components: {
         ReceiverPanel
-    },
-    props: {
-        currentUser: Object
-    },
-    data() {
-        return {
-            listMessages: [],
-            listEncMessages: [],
-            decMessagesID: new Set(),
-            receiver: {},
-            loadingMessages: false,
-            showReceiverInfo: true
-        }
-    },
-    methods: {
-        sendMessage(event) {
-            event.preventDefault();
-            let msgBox = document.getElementById(this.$style.messageInput);
-            let msgContent = msgBox.value;
-            msgBox.value = "";
+    }
+})
+export default class Chatbox extends Vue {
+    @Prop({required: true}) currentUser: User = new User();
+    
+    public listMessages: [] = [];
+    private listEncMessages: [] = [];
+    private decMessagesID: Set<number> = new Set();
+    private receiver: User|null = null;
+    private loadingMessages = false;
+    private showReceiverInfo = true;
+    
+    sendMessage(event: any) : void {
+        event.preventDefault();
+        let msgBox = document.getElementById(this.$style.messageInput) as HTMLInputElement;
+        let msgContent = msgBox.value;
+        msgBox.value = "";
+        
+        if (msgContent && this.receiver)
+        {
+            /*let encryptedMsg = this.$crypto.encryptMessage(msgContent, this.currentUser.PublicKey, this.receiver.PublicKey);
             
-            if (msgContent && this.receiver.UserID && this.receiver.PublicKey)
+            if (encryptedMsg)
             {
-                let encryptedMsg = this.$crypto.encryptMessage(msgContent, this.currentUser.PublicKey, this.receiver.PublicKey);
-                
-                if (encryptedMsg)
-                {
-                    axios.post("https://chat-backend.ducng.dev/chat/sendMessage", {
-                        receiverID: this.receiver.UserID,
-                        encryptedMsg: encryptedMsg
-                    }).then(res => {
-                        if (res.data.status)
-                        {
-                            this.getMessages();
-                        }
-                        else
-                        {
-                            this.$bvToast.hide();
-                            this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
-                                title: "Oops!",
-                                toaster: "b-toaster-top-center",
-                                solid: true,
-                                autoHideDelay: 3000,
-                                variant: "danger"
-                            });
-                            
-                            msgBox.value = msgContent;
-                        }
-                    });
-                }
-            }
-        },
-        getMessages(pReceiver = this.receiver) {
-            let queue = ++getMessagesQueue;
-            
-            if (pReceiver.UserID)
-            {
-                axios.post("https://chat-backend.ducng.dev/chat/getMessages", {receiverID: pReceiver.UserID})
-                .then(res => {
-                    if (queue == getMessagesQueue)
-                    {                        
-                        if (res.data.status)
-                        {                            
-                            this.listEncMessages = [...res.data.messages, ...this.listEncMessages].filter(entry => {
-                                return !this.decMessagesID.has(entry.MessageID);
-                            });
-                            
-                            if (this.listEncMessages.length > 0)
-                            {
-                                clearInterval(interval_decryptMsgs);
-                                interval_decryptMsgs = setInterval(() => {
-                                    if (this.listEncMessages.length > 0)
-                                    {
-                                        let entry = this.listEncMessages.pop();
-                                        if (!this.decMessagesID.has(entry.MessageID))
-                                        {
-                                            this.decMessagesID.add(entry.MessageID);
-                                            let encKey = entry.Sender === this.currentUser.UserID ? entry.KeySender : entry.KeyReceiver;
-                                            
-                                            this.$crypto.decryptMessage(entry.Content, window.localStorage.getItem(this.$STORAGE_PRIVKEY), encKey, entry.IV, entry.AuthTag).then(decMsg => {
-                                                if (decMsg)
-                                                {
-                                                    entry.Content = decMsg;
-                                                    this.listMessages.unshift(entry);
-                                                }
-                                                else
-                                                {
-                                                    console.error("Cannot decrypt message #" + entry.MessageID);
-                                                }
-                                            });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        this.listMessages = this.listMessages.sort((a, b) => {
-                                            return b.MessageID - a.MessageID;
-                                        });
-                                        
-                                        this.loadingMessages = false;
-                                        
-                                        clearInterval(interval_decryptMsgs);
-                                    }
-                                }, 0);
-                            }
-                        }
-                        else
-                        {
-                            this.$bvToast.hide();
-                            this.$bvToast.toast("Unable to get messages. Please contact admin if this occurs again.", {
-                                title: "Oops!",
-                                toaster: "b-toaster-top-center",
-                                solid: true,
-                                autoHideDelay: 5000,
-                                variant: "danger"
-                            });
-                        }
-                    
-                        this.receiver = pReceiver;
+                axios.post(Constants.BACKEND_SERVER_ADDR + "/chat/sendMessage", {
+                    receiverID: this.receiver.UserID,
+                    encryptedMsg: encryptedMsg
+                }).then(res => {
+                    if (res.data.status)
+                    {
+                        this.getMessages();
+                    }
+                    else
+                    {
+                        this.$bvToast.hide();
+                        this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
+                            title: "Oops!",
+                            toaster: "b-toaster-top-center",
+                            solid: true,
+                            autoHideDelay: 3000,
+                            variant: "danger"
+                        });
+                        
+                        msgBox.value = msgContent;
                     }
                 });
-            }
-        },
-        updateReceiver(newReceiver) {
-            if (newReceiver.UserID !== this.receiver.UserID) {
-                clearInterval(interval_decryptMsgs);
-                clearInterval(interval_refreshMsgs);
-                this.loadingMessages = true;
-                this.listMessages = [];
-                this.decMessagesID = new Set();
-                this.getMessages(newReceiver);
-                interval_refreshMsgs = setInterval(this.getMessages, 1000);
-            }
-            
-            updatedReceiver = true;
+            }*/
         }
-    },
-    updated() {
+    }
+    
+    getMessages(pReceiver = this.receiver) : void {
+        /*let queue = ++getMessagesQueue;
+        
+        if (pReceiver.UserID)
+        {
+            axios.post(Constants.BACKEND_SERVER_ADDR + "/chat/getMessages", {receiverID: pReceiver.UserID})
+            .then(res => {
+                if (queue == getMessagesQueue)
+                {                        
+                    if (res.data.status)
+                    {                            
+                        this.listEncMessages = [...res.data.messages, ...this.listEncMessages].filter(entry => {
+                            return !this.decMessagesID.has(entry.MessageID);
+                        });
+                        
+                        if (this.listEncMessages.length > 0)
+                        {
+                            clearInterval(interval_decryptMsgs);
+                            interval_decryptMsgs = setInterval(() => {
+                                if (this.listEncMessages.length > 0)
+                                {
+                                    let entry = this.listEncMessages.pop();
+                                    if (!this.decMessagesID.has(entry.MessageID))
+                                    {
+                                        this.decMessagesID.add(entry.MessageID);
+                                        let encKey = entry.Sender === this.currentUser.UserID ? entry.KeySender : entry.KeyReceiver;
+                                        
+                                        this.$crypto.decryptMessage(entry.Content, window.localStorage.getItem(this.$STORAGE_PRIVKEY), encKey, entry.IV, entry.AuthTag).then(decMsg => {
+                                            if (decMsg)
+                                            {
+                                                entry.Content = decMsg;
+                                                this.listMessages.unshift(entry);
+                                            }
+                                            else
+                                            {
+                                                console.error("Cannot decrypt message #" + entry.MessageID);
+                                            }
+                                        });
+                                    }
+                                }
+                                else
+                                {
+                                    this.listMessages = this.listMessages.sort((a, b) => {
+                                        return b.MessageID - a.MessageID;
+                                    });
+                                    
+                                    this.loadingMessages = false;
+                                    
+                                    clearInterval(interval_decryptMsgs);
+                                }
+                            }, 0);
+                        }
+                    }
+                    else
+                    {
+                        this.$bvToast.hide();
+                        this.$bvToast.toast("Unable to get messages. Please contact admin if this occurs again.", {
+                            title: "Oops!",
+                            toaster: "b-toaster-top-center",
+                            solid: true,
+                            autoHideDelay: 5000,
+                            variant: "danger"
+                        });
+                    }
+                
+                    this.receiver = pReceiver;
+                }
+            });
+        }*/
+    }
+    
+    updateReceiver(newReceiver: any) : void {
+        if (!this.receiver || newReceiver.UserID !== this.receiver.UserID) {
+            clearInterval(interval_decryptMsgs);
+            clearInterval(interval_refreshMsgs);
+            this.loadingMessages = true;
+            this.listMessages = [];
+            this.decMessagesID = new Set();
+            this.getMessages(newReceiver);
+            interval_refreshMsgs = setInterval(this.getMessages, 1000);
+        }
+        
+        updatedReceiver = true;
+    }
+        
+    updated() : void {
         if (updatedReceiver)
         {
             document.getElementById(this.$style.messageInput)?.focus();
             updatedReceiver = false;
         }
-    },
-    created() {
+    }
+    
+    created() : void {
         this.getMessages();
         
         interval_refreshMsgs = setInterval(this.getMessages, 1000);
-    },
-    destroyed() {
+    }
+    
+    destroyed() : void {
         clearInterval(interval_refreshMsgs);
         clearInterval(interval_decryptMsgs);
     }

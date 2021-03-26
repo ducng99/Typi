@@ -6,45 +6,43 @@
 </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from "axios"
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import Constants from '../../constants'
 import { mixin as clickaway } from 'vue-clickaway';
 
-export default {
+@Component({
     name: "OptionsMenu",
-    mixins: [ clickaway ],
-    props: {
-        value: {
-            type: Boolean,
-            required: true
-        }
-    },
-    methods: {
-        away() {
-            this.$emit("input", false);
-        },
-        
-        logout() {
-            axios.post("https://chat-backend.ducng.dev/logout", {sessionID: this.$cookies.get(this.$COOKIE_SESSION_ID)})
-            .then(res => {
-                if (res.data.status)
-                {
-                    this.$cookies.remove(this.$COOKIE_SESSION_ID);
-                    window.location.reload();
-                }
-                else
-                {
-                    this.$bvToast.hide();
-                    this.$bvToast.toast("Unable to logout. Please contact admin if this occurs again.", {
-                        title: "Oops!",
-                        toaster: "b-toaster-top-center",
-                        solid: true,
-                        autoHideDelay: 5000,
-                        variant: "danger"
-                    });
-                }
-            });
-        }
+    mixins: [ clickaway ]
+})
+export default class OptionsMenu extends Vue {
+    @Prop({required: true}) value!: boolean;
+    
+    away() : void {
+        this.$emit("input", false);
+    }
+    
+    logout() : void {
+        axios.post(Constants.BACKEND_SERVER_ADDR + "/logout")
+        .then(res => {
+            if (res.data.status)
+            {
+                this.$cookies.remove(Constants.COOKIE_SESSION_ID);
+                window.location.reload();
+            }
+            else
+            {
+                this.$bvToast.hide();
+                this.$bvToast.toast("Unable to logout. Please contact admin if this occurs again.", {
+                    title: "Oops!",
+                    toaster: "b-toaster-top-center",
+                    solid: true,
+                    autoHideDelay: 5000,
+                    variant: "danger"
+                });
+            }
+        });
     }
 }
 </script>
