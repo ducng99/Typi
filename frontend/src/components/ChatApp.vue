@@ -7,7 +7,7 @@
                 </div>
                 <div class="d-flex align-items-center">
                     <div class="mr-auto">
-                        Hi <b>{{ currentUser?.Username }}</b>.
+                        Hi <b>{{ currentUser.Username }}</b>.
                     </div>
                     <div @click="$bvModal.show('addFriendModal')" :class="$style.button_icon">
                         <b-icon icon="person-plus-fill"></b-icon>
@@ -63,7 +63,7 @@ let keepAliveInterval: number, updateFriendsListInterval: number;
     }
 })
 export default class ChatApp extends Vue {
-    currentUser: User|null = null;
+    currentUser: User = new User();
     acceptedFriends: User[] = [];
     blockedFriends: User[] = [];
     pendingFriends: User[] = [];
@@ -88,13 +88,13 @@ export default class ChatApp extends Vue {
                 });
                 
                 this.blockedFriends = res.data.friends.filter((entry: Relationship) => {
-                    return (entry.Status === "Blocked" && entry.TargetUser !== this.currentUser?.UserID);
+                    return (entry.Status === "Blocked" && entry.TargetUser !== this.currentUser.UserID);
                 }).map((entry: Relationship) => {
                     return User.Init({UserID: entry.UserID, Username: entry.Username});
                 });
                 
                 this.pendingFriends = res.data.friends.filter((entry: Relationship) => {
-                    return (entry.Status === "Pending" && entry.TargetUser === this.currentUser?.UserID);
+                    return (entry.Status === "Pending" && entry.TargetUser === this.currentUser.UserID);
                 }).map((entry: Relationship) => {
                     return User.Init({UserID: entry.UserID, Username: entry.Username});
                 });
@@ -152,14 +152,14 @@ export default class ChatApp extends Vue {
                     this.updateFriendsList();
                 }, 1000);
                 
-                this.keepAlive();
-                
                 MessageEncryption.UpdateStorageKeys(this.currentUser.UserID, this.listKeys);
             }
             else
             {
                 this.$emit("loginCheck");
             }
+            
+            this.keepAlive();
         });
     }
     
