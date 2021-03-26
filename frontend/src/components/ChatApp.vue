@@ -46,12 +46,12 @@ import axios from "axios"
 import Constants from '@/constants'
 import User from '@/models/User'
 import MessageEncryption from '@/encryption/MessageEncryption'
+import PrivateKey from '@/models/PrivateKey'
 
 import AddFriendModal from "@/components/ChatComponents/AddFriendModal.vue"
 import Chatbox from "@/components/ChatComponents/Chatbox.vue"
 import OptionsMenu from "@/components/ChatComponents/OptionsMenu.vue"
 import ListFriendsModal from "@/components/ChatComponents/ListFriendsModal.vue"
-import PrivateKey from '@/models/PrivateKey';
 
 let keepAliveInterval: number, updateFriendsListInterval: number;
 
@@ -117,7 +117,7 @@ export default class ChatApp extends Vue {
         this.sendKeepAlive();
         clearInterval(keepAliveInterval);
         
-        keepAliveInterval = setInterval(() => {
+        keepAliveInterval = window.setInterval(() => {
             this.sendKeepAlive();
         }, 60000);
     }
@@ -141,7 +141,7 @@ export default class ChatApp extends Vue {
                 this.currentUser = User.Init(res.data.user);
         
                 this.updateFriendsList();
-                updateFriendsListInterval = setInterval(() => {
+                updateFriendsListInterval = window.setInterval(() => {
                     this.updateFriendsList();
                 }, 1000);
                 

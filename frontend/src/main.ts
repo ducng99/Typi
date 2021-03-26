@@ -6,7 +6,7 @@ import App from './App.vue'
 
 require('bootstrap/dist/css/bootstrap.css')
 require('bootstrap-vue/dist/bootstrap-vue.css')
-const styles = require('./style.module.css')
+import styles from '@/style.module.css'
 
 Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
