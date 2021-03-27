@@ -105,7 +105,7 @@ export default {
         }
     },
     
-    async hashPassword(password : string, salt?: string): Promise<false | { password: string; salt: string; }>
+    async HashString(message : string, salt?: string, times?: number): Promise<false | { hashed: string, salt: string }>
     {
         try
         {
@@ -115,11 +115,13 @@ export default {
             }
             
             const hashed = await argon2.hash({
-                pass: password,
-                salt: salt
+                pass: message,
+                salt: salt,
+                time: times ?? 1,
+                type: argon2.ArgonType.Argon2id
             });
             
-            return { password: hashed.encoded, salt: salt }
+            return { hashed: hashed.hashHex, salt: salt }
         }
         catch
         {

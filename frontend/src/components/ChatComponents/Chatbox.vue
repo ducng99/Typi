@@ -50,6 +50,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import User from '@/models/User'
 import Message from '@/models/Message'
+import ChatInfo from '@/models/ChatInfo'
 import ChatHandler from '@/handlers/ChatHandler'
 import ReceiverPanel from '@/components/ChatComponents/ReceiverPanel.vue'
 
@@ -65,6 +66,7 @@ let updatedReceiver = false;
 })
 export default class Chatbox extends Vue {
     @Prop({required: true}) currentUser: User = new User();
+    @Prop({required: true}) listChatInfos: Record<number, ChatInfo> = {};
     
     listMessages: Message[] = [];
     listEncMessages: Message[] = [];
@@ -81,7 +83,7 @@ export default class Chatbox extends Vue {
         
         if (msgContent && this.receiver.UserID)
         {
-            ChatHandler.SendMessage(this.receiver.UserID, msgContent)
+            ChatHandler.SendMessage(this.receiver.UserID, msgContent, this.listChatInfos[this.receiver.UserID])
             .then(res => {
                 if (res)
                 {

@@ -31,7 +31,7 @@
                 </div>
             </b-col>
             <b-col class="p-0 bg-white">
-                <Chatbox ref="chatbox" :currentUser="currentUser" :listKeys="listKeys"/>
+                <Chatbox ref="chatbox" :currentUser="currentUser" :listChatInfos="listChatInfos"/>
             </b-col>
         </b-row>
         
@@ -45,9 +45,9 @@ import { Component, Vue } from 'vue-property-decorator';
 import axios from "axios"
 import Constants from '@/constants'
 import User from '@/models/User'
-import MessageEncryption from '@/encryption/MessageEncryption'
-import PrivateKey from '@/models/PrivateKey'
+import KeysManager from '@/encryption/KeysManager'
 import Relationship from '@/models/Relationship'
+import ChatInfo from '@/models/ChatInfo'
 
 import AddFriendModal from "@/components/ChatComponents/AddFriendModal.vue"
 import Chatbox from "@/components/ChatComponents/Chatbox.vue"
@@ -63,12 +63,12 @@ let keepAliveInterval: number, updateFriendsListInterval: number;
     }
 })
 export default class ChatApp extends Vue {
-    currentUser: User = new User();
+    currentUser = new User();
     acceptedFriends: User[] = [];
     blockedFriends: User[] = [];
     pendingFriends: User[] = [];
     showMenu = false;
-    listKeys: Record<number, PrivateKey[]> = {}
+    listChatInfos: Record<number, ChatInfo> = {}
     
     $refs!: Vue["$refs"] & {
         chatbox: InstanceType<typeof Chatbox>,
@@ -152,7 +152,7 @@ export default class ChatApp extends Vue {
                     this.updateFriendsList();
                 }, 1000);
                 
-                MessageEncryption.UpdateStorageKeys(this.currentUser.UserID, this.listKeys);
+                KeysManager.UpdateStorageChatInfos(this.currentUser.UserID, this.listChatInfos);
             }
             else
             {
