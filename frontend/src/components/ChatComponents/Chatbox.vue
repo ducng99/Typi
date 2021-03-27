@@ -22,10 +22,10 @@
                             <small><i>Start sending text messages to {{ receiver.Username }}!</i></small>
                         </div>
                         <div v-for="message in listMessages" :key="message.MessageID">
-                            <div v-if="message.Sender === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-end">
+                            <div v-if="message.SenderID === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-end">
                                 <div :class="$style.outgoing_msg + ' text-break'" v-b-tooltip.hover.left="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                             </div>
-                            <div v-if="message.Receiver === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-start">
+                            <div v-if="message.ReceiverID === currentUser.UserID" class="d-flex w-100 mb-1 justify-content-start">
                                 <div :class="$style.incoming_msg + ' text-break'" v-b-tooltip.hover.right="new Date(message.SendTime * 1000).toLocaleString('en-NZ')">{{ message.Content }}</div>
                             </div>
                         </div>
@@ -48,10 +48,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import axios from "axios"
-import Constants from '../../constants'
-import User from '../../models/User'
-import ReceiverPanel from "./ReceiverPanel.vue"
+import User from '@/models/User'
+import Message from '@/models/Message'
+import ChatHandler from '@/handlers/ChatHandler'
+import ReceiverPanel from '@/components/ChatComponents/ReceiverPanel.vue'
 
 let interval_refreshMsgs: number, interval_decryptMsgs: number;
 let getMessagesQueue = 0;
@@ -66,48 +66,41 @@ let updatedReceiver = false;
 export default class Chatbox extends Vue {
     @Prop({required: true}) currentUser: User = new User();
     
-    public listMessages: [] = [];
-    private listEncMessages: [] = [];
-    private decMessagesID: Set<number> = new Set();
-    private receiver: User|null = null;
-    private loadingMessages = false;
-    private showReceiverInfo = true;
+    listMessages: Message[] = [];
+    listEncMessages: Message[] = [];
+    decMessagesID: Set<number> = new Set();
+    receiver: User = new User();
+    loadingMessages = false;
+    showReceiverInfo = true;
     
-    sendMessage(event: any) : void {
+    sendMessage(event: Event) : void {
         event.preventDefault();
-        let msgBox = document.getElementById(this.$style.messageInput) as HTMLInputElement;
-        let msgContent = msgBox.value;
-        msgBox.value = "";
+        let msgInputBox = document.getElementById(this.$style.messageInput) as HTMLInputElement;
+        let msgContent = msgInputBox.value;
+        msgInputBox.value = "";
         
-        if (msgContent && this.receiver)
+        if (msgContent && this.receiver.UserID)
         {
-            /*let encryptedMsg = this.$crypto.encryptMessage(msgContent, this.currentUser.PublicKey, this.receiver.PublicKey);
-            
-            if (encryptedMsg)
-            {
-                axios.post(Constants.BACKEND_SERVER_ADDR + "/chat/sendMessage", {
-                    receiverID: this.receiver.UserID,
-                    encryptedMsg: encryptedMsg
-                }).then(res => {
-                    if (res.data.status)
-                    {
-                        this.getMessages();
-                    }
-                    else
-                    {
-                        this.$bvToast.hide();
-                        this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
-                            title: "Oops!",
-                            toaster: "b-toaster-top-center",
-                            solid: true,
-                            autoHideDelay: 3000,
-                            variant: "danger"
-                        });
-                        
-                        msgBox.value = msgContent;
-                    }
-                });
-            }*/
+            ChatHandler.SendMessage(this.receiver.UserID, msgContent)
+            .then(res => {
+                if (res)
+                {
+                    
+                }
+                else
+                {
+                    this.$bvToast.hide();
+                    this.$bvToast.toast("Unable to send message. Please contact admin if this occurs again.", {
+                        title: "Oops!",
+                        toaster: "b-toaster-top-center",
+                        solid: true,
+                        autoHideDelay: 3000,
+                        variant: "danger"
+                    });
+                    
+                    //msgInputBox.value = msgContent;
+                }
+            });
         }
     }
     
@@ -182,7 +175,7 @@ export default class Chatbox extends Vue {
         }*/
     }
     
-    updateReceiver(newReceiver: any) : void {
+    updateReceiver(newReceiver: User) : void {
         if (!this.receiver || newReceiver.UserID !== this.receiver.UserID) {
             clearInterval(interval_decryptMsgs);
             clearInterval(interval_refreshMsgs);
@@ -190,7 +183,7 @@ export default class Chatbox extends Vue {
             this.listMessages = [];
             this.decMessagesID = new Set();
             this.getMessages(newReceiver);
-            interval_refreshMsgs = setInterval(this.getMessages, 1000);
+            interval_refreshMsgs = window.setInterval(this.getMessages, 1000);
         }
         
         updatedReceiver = true;

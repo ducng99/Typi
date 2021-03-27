@@ -11,7 +11,7 @@ export default {
      * @param userID current user ID for storage access
      * @param listKeys listKeys object to update
      */
-    UpdateStorageKeys(userID : number, listKeys : Record<string, PrivateKey>) : void
+    UpdateStorageKeys(userID : number, listKeys : Record<number, PrivateKey[]>) : void
     {
         SecureStorage.GetItem(Constants.STORAGE_KEYS + userID)
         .then(value => {            
@@ -33,29 +33,35 @@ export default {
             }
         });
     },
+    
+    async AddStorageKey(userID: number, listKeys : Record<number, PrivateKey[]>) : Promise<boolean>
+    {
+        return await SecureStorage.SaveItem(Constants.STORAGE_KEYS + userID, JSON.stringify(listKeys));
+    },
 
     /**
      * Generate a new Diffie-Hellman key and send to server to update.
      * @param receiverID receiver user ID
-     * @param keyID key ID to save
      * @returns a Key object containing keyID and public key generated. Return false if failed
      */
     async AddNewKey(receiverID : number, keyID : number) : Promise<PrivateKey|false>
     {
         const keys = await CryptoTools.GenerateDHKeys();
-        const publicKeyEntry = new PublicKey(keyID, keys.getPublicKey().toString('hex'));
-        
-        const data = Buffer.from(JSON.stringify(publicKeyEntry.toJSON())).toString('base64');
-        
-        const res = await axios.post(Constants.BACKEND_SERVER_ADDR + "/publickeys/updatePublicKey",
+        if (keys)
         {
-            receiverID: receiverID,
-            publicKey: data
-        });
-        
-        if (res.data.status)
-        {
-            return new PrivateKey(keyID, keys.getPrivateKey().toString('hex'));
+            const publicKeyEntry = new PublicKey(keyID, keys.getPublicKey().toString('hex'));
+            const data = Buffer.from(JSON.stringify(publicKeyEntry.toJSON())).toString('base64');
+            
+            const res = await axios.post(Constants.BACKEND_SERVER_ADDR + "/publickeys/updatePublicKey",
+            {
+                receiverID: receiverID,
+                publicKey: data
+            });
+            
+            if (res.data.status)
+            {
+                return new PrivateKey(keyID, keys.getPrivateKey().toString('hex'));
+            }
         }
         
         return false;

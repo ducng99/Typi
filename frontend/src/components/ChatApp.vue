@@ -68,7 +68,7 @@ export default class ChatApp extends Vue {
     blockedFriends: User[] = [];
     pendingFriends: User[] = [];
     showMenu = false;
-    listKeys: Record<string, PrivateKey> = {}
+    listKeys: Record<number, PrivateKey[]> = {}
     
     $refs!: Vue["$refs"] & {
         chatbox: InstanceType<typeof Chatbox>,
@@ -102,7 +102,7 @@ export default class ChatApp extends Vue {
         });
     }
     
-    public onChatPick(receiver : any) : void {
+    public onChatPick(receiver : User) : void {
         this.$refs.chatbox.updateReceiver(receiver);
     }
     

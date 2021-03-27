@@ -20,13 +20,13 @@
 <script lang="ts">
 import axios from "axios"
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import User from '../../models/User'
+import User from '@/models/User'
 
 @Component({
     name: "ReceiverPanel"
 })
 export default class ReceiverPanel extends Vue {
-    @Prop({required: true, default: null}) receiver!: User
+    @Prop({required: true}) receiver: User = new User()
 }
 </script>
 

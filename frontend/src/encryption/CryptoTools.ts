@@ -19,24 +19,40 @@ export default {
      * Generate a new Diffie-Hellman key pair
      * @returns {Promise<DiffieHellman>} a new DiffieHellman object
      */
-    async GenerateDHKeys(): Promise<DiffieHellman>
+    async GenerateDHKeys(): Promise<DiffieHellman|false>
     {
-        const keys = crypto.getDiffieHellman('modp14'); // 2048-bit prime
-        keys.generateKeys();
-        
-        return keys;
+        try
+        {
+            const keys = crypto.getDiffieHellman('modp14'); // 2048-bit prime
+            keys.generateKeys();
+            
+            return keys;
+        }
+        catch
+        {
+            return false;
+        }
     },
     
     /**
      * Get shared secret from our key pair and receiver's public key
-     * @param {DiffieHellman} DHKeypair DiffieHellman object containing private key
-     * @param {String} ReceiverPublicKey receiver public key in hex
+     * @param {string} senderPrivateKey sender private key in hex
+     * @param {string} receiverPublicKey receiver public key in hex
      * @returns {Buffer} a buffer containing the shared secret key
      */
-     GetSharedSecret(DHKeypair: DiffieHellman, ReceiverPublicKey: string): Buffer
-     {
-         return DHKeypair.computeSecret(ReceiverPublicKey, 'hex');
-     },
+    async GetSharedSecret(senderPrivateKey: string, receiverPublicKey: string): Promise<Buffer|false>
+    {
+        try
+        {
+            const senderKeys = crypto.getDiffieHellman('modp14');
+            senderKeys.setPrivateKey(senderPrivateKey, 'hex');
+            return senderKeys.computeSecret(receiverPublicKey, 'hex');
+        }
+        catch
+        {
+            return false;
+        }
+    },
     
     /**
      * Encrypt given message with a given key
