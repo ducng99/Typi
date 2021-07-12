@@ -1,3 +1,7 @@
+# Project Rewrite
+Typi will be rewritten in Typescript, using React instead of Vue. The current working model is a failure. New plans incoming.<br/>
+Stay tuned.
+
 # Typi :speech_balloon: - a simple End-to-End Encryption web chat (W.I.P)
 <p align="center"><img src="https://typi.ducng.dev/typi-logo.png" alt="Typi logo" height="100px"/></p>
 
